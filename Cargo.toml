@@ -5,4 +5,6 @@ authors = ["@danielbintar <daniel.bintar@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-ggez = "0.5.0-rc.0"
+serde = "1.0"
+serde_derive = "1.0"
+amethyst = "0.10.0"
