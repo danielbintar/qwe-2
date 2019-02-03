@@ -1,47 +1,39 @@
-extern crate ggez;
+extern crate amethyst;
 
-use ggez::{graphics, event, GameResult, Context};
+use amethyst::prelude::*;
+use amethyst::ui::{DrawUi, UiBundle};
+use amethyst::renderer::{DisplayConfig, DrawFlat2D, Pipeline, RenderBundle, Stage};
+use amethyst::core::transform::TransformBundle;
 
-const GRID_SIZE: (i16, i16) = (34, 19);
-const GRID_CELL_SIZE: (i16, i16) = (32, 32);
+mod game;
 
-const SCREEN_SIZE: (f32, f32) = (
-    GRID_SIZE.0 as f32 * GRID_CELL_SIZE.0 as f32,
-    GRID_SIZE.1 as f32 * GRID_CELL_SIZE.1 as f32,
-);
+use crate::game::Game;
 
-struct GameState {
+fn main() -> amethyst::Result<()> {
+    amethyst::start_logger(Default::default());
 
+    let config = DisplayConfig::load("./config/display.ron");
+
+    let pipe = Pipeline::build()
+        .with_stage(
+            Stage::with_backbuffer()
+                .clear_target([0.0, 0.0, 0.0, 1.0], 1.0)
+                .with_pass(DrawFlat2D::new())
+                .with_pass(DrawUi::new()),
+        );
+
+    let game_data = GameDataBuilder::default()
+        .with_bundle(
+          RenderBundle::new(pipe, Some(config))
+            .with_sprite_sheet_processor()
+        )?
+        .with_bundle(TransformBundle::new())?
+        .with_bundle(UiBundle::<String, String>::new())?;
+
+    let mut game = Application::new("./", Game, game_data)?;
+    game.run();
+
+    Ok(())
 }
 
-impl GameState {
-    pub fn new() -> Self {
-        GameState {
 
-        }
-    }
-}
-
-impl event::EventHandler for GameState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult {
-        Ok(())
-    }
-
-    fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        graphics::clear(ctx, [0.255, 0.0, 0.0, 0.6].into());
-
-        graphics::present(ctx)?;
-        ggez::timer::yield_now();
-        Ok(())
-    }
-}
-
-fn main() -> GameResult {
-    let (ctx, events_loop) = &mut ggez::ContextBuilder::new("qwe-2", "Daniel Bintar Sijabat")
-        .window_setup(ggez::conf::WindowSetup::default().title("QWE!"))
-        .window_mode(ggez::conf::WindowMode::default().dimensions(SCREEN_SIZE.0, SCREEN_SIZE.1))
-        .build()?;
-
-    let state = &mut GameState::new();
-    event::run(ctx, events_loop, state)
-}
