@@ -6,6 +6,8 @@ use specs::Entity;
 
 use std::collections::HashMap;
 
+use crate::config::Request;
+
 pub struct Game;
 
 impl SimpleState for Game {
@@ -20,10 +22,7 @@ impl SimpleState for Game {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
                     let world = data.world;
-                    let ids = world.read_resource::<Ids>();
-                    let mut ui_text_storage = world.write_storage::<UiText>();
-                    ui_text_storage.get_mut(*ids.ids.get("notice").unwrap()).unwrap().text = "Request login to server".to_string();
-                    println!("LOGINNNN")
+                    request_login(world)
                 },
                 _ => (),
             },
@@ -31,6 +30,38 @@ impl SimpleState for Game {
         }
         Trans::None
     }
+}
+
+fn request_login(world: &mut World) {
+    let ids = world.read_resource::<Ids>();
+    let mut ui_text_storage = world.write_storage::<UiText>();
+    ui_text_storage.get_mut(*ids.ids.get("notice").unwrap()).unwrap().text = "Request login to server".to_string();
+
+    let mut map = HashMap::new();
+    map.insert("username", &ui_text_storage.get(*ids.ids.get("username").unwrap()).unwrap().text);
+    map.insert("password", &ui_text_storage.get(*ids.ids.get("password").unwrap()).unwrap().text);
+
+    let config = world.read_resource::<Request>();
+    let uri = format!("{}{}", config.url, "/users/sign_in");
+
+    let resp = reqwest::Client::new()
+        .post(&uri)
+        .json(&map)
+        .send();
+
+    let notice = match resp {
+        Ok(resp) => {
+            if resp.status().is_success() {
+                "Login Success"
+            } else if resp.status().is_server_error() {
+                "Server is maintenance"
+            } else {
+                "Wrong username or password"
+            }
+        },
+        Err(_) => "Server is maintenance"
+    };
+    ui_text_storage.get_mut(*ids.ids.get("notice").unwrap()).unwrap().text = notice.to_string();
 }
 
 struct Ids {
@@ -83,10 +114,6 @@ fn initialize_ui(world: &mut World) {
             20.))
         .build();
 
-    let mut ids = HashMap::new();
-    ids.insert("notice".to_string(), notice);
-    world.add_resource(Ids{ids: ids});
-
 
     let transform = UiTransform::new(
         "username_label".to_string(), Anchor::TopMiddle,
@@ -109,7 +136,7 @@ fn initialize_ui(world: &mut World) {
         50., -250., 1., 400., 50., 0
     );
 
-    world
+    let username = world
         .create_entity()
         .with(transform)
         .with(UiText::new(
@@ -160,6 +187,14 @@ fn initialize_ui(world: &mut World) {
             [0.0, 0.0, 0.0, 1.0],
             false))
         .build();
+
+
+    let mut ids = HashMap::new();
+    ids.insert("notice".to_string(), notice);
+    ids.insert("username".to_string(), username);
+    ids.insert("password".to_string(), password);
+    world.add_resource(Ids{ids: ids});
+
     let mut ui_text_storage = world.write_storage::<UiText>();
     ui_text_storage.get_mut(password).unwrap().password = true;
 }

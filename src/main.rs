@@ -1,5 +1,6 @@
 extern crate amethyst;
 extern crate specs;
+extern crate reqwest;
 
 use amethyst::prelude::*;
 use amethyst::ui::{DrawUi, UiBundle};
@@ -8,13 +9,16 @@ use amethyst::core::transform::TransformBundle;
 use amethyst::input::InputBundle;
 
 mod game;
+mod config;
 
 use crate::game::Game;
+use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
     let config = DisplayConfig::load("./config/display.ron");
+    let request_config = Request::load("./config/request.ron");
 
     let pipe = Pipeline::build()
         .with_stage(
@@ -33,7 +37,10 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(InputBundle::<String, String>::new())?
         .with_bundle(UiBundle::<String, String>::new())?;
 
-    let mut game = Application::new("./", Game, game_data)?;
+    let mut game = Application::build("./", Game)?
+        .with_resource(request_config)
+        .build(game_data)?;
+
     game.run();
 
     Ok(())
