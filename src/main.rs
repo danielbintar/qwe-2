@@ -1,9 +1,11 @@
 extern crate amethyst;
+extern crate specs;
 
 use amethyst::prelude::*;
 use amethyst::ui::{DrawUi, UiBundle};
 use amethyst::renderer::{DisplayConfig, DrawFlat2D, Pipeline, RenderBundle, Stage};
 use amethyst::core::transform::TransformBundle;
+use amethyst::input::InputBundle;
 
 mod game;
 
@@ -28,6 +30,7 @@ fn main() -> amethyst::Result<()> {
             .with_sprite_sheet_processor()
         )?
         .with_bundle(TransformBundle::new())?
+        .with_bundle(InputBundle::<String, String>::new())?
         .with_bundle(UiBundle::<String, String>::new())?;
 
     let mut game = Application::new("./", Game, game_data)?;

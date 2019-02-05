@@ -1,6 +1,10 @@
 use amethyst::prelude::*;
 use amethyst::assets::{Loader};
-use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, UiButtonBuilder};
+use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, UiButtonBuilder, UiEventType::Click};
+
+use specs::Entity;
+
+use std::collections::HashMap;
 
 pub struct Game;
 
@@ -10,6 +14,27 @@ impl SimpleState for Game {
 
         initialize_ui(world);
     }
+
+    fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+        match event {
+            StateEvent::Ui(x) => match x.event_type {
+                Click => {
+                    let world = data.world;
+                    let ids = world.read_resource::<Ids>();
+                    let mut ui_text_storage = world.write_storage::<UiText>();
+                    ui_text_storage.get_mut(*ids.ids.get("notice").unwrap()).unwrap().text = "Request login to server".to_string();
+                    println!("LOGINNNN")
+                },
+                _ => (),
+            },
+            _ => (),
+        }
+        Trans::None
+    }
+}
+
+struct Ids {
+    ids: HashMap<String, Entity>
 }
 
 fn initialize_ui(world: &mut World) {
@@ -23,7 +48,7 @@ fn initialize_ui(world: &mut World) {
 
     let transform = UiTransform::new(
         "title".to_string(), Anchor::TopMiddle,
-        -50., -100., 1., 200., 50., 0,
+        0., -100., 1., 200., 50., 0,
     );
 
     world
@@ -39,8 +64,28 @@ fn initialize_ui(world: &mut World) {
 
     let button_builder = UiButtonBuilder::new("login_button", "LOGIN")
         .with_anchor(Anchor::TopMiddle)
-        .with_position(-50., -500.);
+        .with_position(0., -500.);
     button_builder.build_from_world(world);
+
+
+    let transform = UiTransform::new(
+        "notice".to_string(), Anchor::TopMiddle,
+        0., -600., 1., 400., 50., 0,
+    );
+
+    let notice = world
+        .create_entity()
+        .with(transform)
+        .with(UiText::new(
+            font.clone(),
+            "".to_string(),
+            [1., 1., 1., 1.],
+            20.))
+        .build();
+
+    let mut ids = HashMap::new();
+    ids.insert("notice".to_string(), notice);
+    world.add_resource(Ids{ids: ids});
 
 
     let transform = UiTransform::new(
