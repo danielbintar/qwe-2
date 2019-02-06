@@ -8,9 +8,9 @@ use std::collections::HashMap;
 
 use crate::config::Request;
 
-pub struct Game;
+pub struct Login;
 
-impl SimpleState for Game {
+impl SimpleState for Login {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
