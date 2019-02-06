@@ -11,7 +11,7 @@ use amethyst::input::InputBundle;
 mod states;
 mod config;
 
-use crate::states::login::Login;
+use crate::states::login::State;
 use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
@@ -37,7 +37,7 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(InputBundle::<String, String>::new())?
         .with_bundle(UiBundle::<String, String>::new())?;
 
-    let mut game = Application::build("./", Login)?
+    let mut game = Application::build("./", State::new())?
         .with_resource(request_config)
         .build(game_data)?;
 
