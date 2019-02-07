@@ -6,6 +6,7 @@ use specs::Entity;
 
 use std::collections::HashMap;
 
+use crate::config::Request;
 use super::login::State as LoginState;
 
 enum Buttons {
@@ -172,6 +173,38 @@ impl State {
         let mut ui_text_storage = world.write_storage::<UiText>();
         ui_text_storage.get_mut(password).unwrap().password = true;
     }
+
+    fn register(&self, world: &mut World) -> SimpleTrans {
+        let mut ui_text_storage = world.write_storage::<UiText>();
+        ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = "Request register to server".to_string();
+
+        let mut map = HashMap::new();
+        map.insert("username", &ui_text_storage.get(*self.ui_texts.get(&Texts::Username).unwrap()).unwrap().text);
+        map.insert("password", &ui_text_storage.get(*self.ui_texts.get(&Texts::Password).unwrap()).unwrap().text);
+
+        let config = world.read_resource::<Request>();
+        let uri = format!("{}{}", config.url, "/users/sign_up");
+
+        let resp = reqwest::Client::new()
+            .post(&uri)
+            .json(&map)
+            .send();
+
+        let notice = match resp {
+            Ok(resp) => {
+                if resp.status().is_success() {
+                    "Register Success"
+                } else if resp.status().is_server_error() {
+                    "Server is maintenance"
+                } else {
+                    "Username already used"
+                }
+            },
+            Err(_) => "Server is maintenance"
+        };
+        ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = notice.to_string();
+        Trans::None
+    }
 }
 
 impl SimpleState for State {
@@ -188,7 +221,7 @@ impl SimpleState for State {
                     if let Some(button) = self.ui_buttons.get(&x.target) {
                         match button {
                             Buttons::Login => return login(data.world),
-                            Buttons::Register => ()
+                            Buttons::Register => return self.register(data.world)
                         }
                     }
                 },
