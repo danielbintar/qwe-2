@@ -63,7 +63,6 @@ impl State {
 
 
         for i in 0..general::MAX_MY_CHARACTER {
-            println!("{}", i);
             let x: i32 = (i as i32 - 2) * 200;
 
             if self.characters.len() <= i {
@@ -171,8 +170,7 @@ impl SimpleState for State {
                     if let Some(button) = self.ui_buttons.get(&x.target) {
                         match button {
                             Buttons::Logout => return self.logout(data.world),
-                            Buttons::Create => return self.create(data.world),
-                            _ => ()
+                            Buttons::Create => return self.create(data.world)
                         }
                     }
                 },

@@ -6,13 +6,10 @@ use specs::Entity;
 
 use crate::config::Request;
 use crate::model::token::Token;
-use crate::model::character::Character;
 use crate::model::error::Response as ErrorResponse;
-use crate::general;
 
 use super::index::State as IndexState;
 
-use std::vec::Vec;
 use std::collections::HashMap;
 
 use reqwest::header;

@@ -193,7 +193,6 @@ impl State {
     fn after_login(&mut self, world: &mut World, notice: String) {
         let mut ui_text_storage = world.write_storage::<UiText>();
         ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = notice.to_string();
-        self.login = true
     }
 
     fn perform_login(&self, form: HashMap<String, String>, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
@@ -212,6 +211,7 @@ impl State {
         let notice = match resp {
             Ok(mut resp) => {
                 if resp.status().is_success() {
+                    self.login = true;
                     let token: Token = resp.json().unwrap();
                     world.add_resource(token);
                     "Login Success"
