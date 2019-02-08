@@ -11,6 +11,7 @@ use amethyst::input::InputBundle;
 mod states;
 mod config;
 mod model;
+mod general;
 
 use crate::states::auth::login::State;
 use crate::config::Request;
