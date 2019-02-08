@@ -7,7 +7,10 @@ use specs::Entity;
 use crate::config::Request;
 use crate::model::token::Token;
 use crate::model::character::Character;
+use crate::model::error::Response as ErrorResponse;
 use crate::general;
+
+use super::index::State as IndexState;
 
 use std::vec::Vec;
 use std::collections::HashMap;
@@ -27,7 +30,8 @@ enum Texts {
 
 pub struct State {
     ui_buttons: HashMap<Entity, Buttons>,
-    ui_texts: HashMap<Texts, Entity>
+    ui_texts: HashMap<Texts, Entity>,
+    create: bool,
 }
 
 impl State {
@@ -37,7 +41,8 @@ impl State {
 
         Self {
             ui_buttons: HashMap::with_capacity(btn_count),
-            ui_texts: HashMap::with_capacity(text_count)
+            ui_texts: HashMap::with_capacity(text_count),
+            create: false
         }
     }
 
@@ -124,6 +129,57 @@ impl State {
         Trans::Pop
     }
 
+
+    fn prepare_create(&self, world: &mut World) -> HashMap<String, String> {
+        let mut ui_text_storage = world.write_storage::<UiText>();
+        ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = "Request create to server".to_string();
+
+        let mut map = HashMap::new();
+        let name = ui_text_storage.get(*self.ui_texts.get(&Texts::Name).unwrap()).unwrap().text.clone();
+        map.insert("name".to_string(), name);
+        map
+    }
+
+    fn after_create(&mut self, world: &mut World, notice: String) {
+        let mut ui_text_storage = world.write_storage::<UiText>();
+        ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = notice.to_string();
+    }
+
+    fn perform_create(&self, form: HashMap<String, String>, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
+        let config = world.read_resource::<Request>();
+        let uri = format!("{}{}", config.url, "/my-characters");
+
+        let mut headers = header::HeaderMap::new();
+        let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+        headers.insert(header::AUTHORIZATION, header::HeaderValue::from_str(&token).unwrap());
+
+        reqwest::Client::builder()
+            .default_headers(headers)
+            .build()?
+            .post(&uri)
+            .json(&form)
+            .send()
+    }
+
+    fn create(&mut self, world: &mut World) {
+        let form = self.prepare_create(world);
+        let resp = self.perform_create(form, world);
+        let notice = match resp {
+            Ok(mut resp) => {
+                if resp.status().is_success() {
+                    self.create = true;
+                    "Success".to_string()
+                } else if resp.status().is_server_error() {
+                    "Server is maintenance".to_string()
+                } else {
+                    let err: ErrorResponse = resp.json().unwrap();
+                    err.get_error()
+                }
+            },
+            Err(_) => "Server is maintenance".to_string()
+        };
+        self.after_create(world, notice)
+    }
 }
 
 impl SimpleState for State {
@@ -134,13 +190,20 @@ impl SimpleState for State {
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+        if self.create {
+            data.world.delete_all();
+            return Trans::Switch(Box::new({
+                IndexState::new()
+            }))
+        }
+
         match event {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
                     if let Some(button) = self.ui_buttons.get(&x.target) {
                         match button {
                             Buttons::Back => return self.back(data.world),
-                            _ => ()
+                            Buttons::Create => self.create(data.world)
                         }
                     }
                 },

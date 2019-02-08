@@ -83,7 +83,7 @@ impl State {
                     .with(transform)
                     .with(UiText::new(
                         font.clone(),
-                        "Character".to_string(),
+                        self.characters[i as usize].get_name(),
                         [1., 1., 1., 1.],
                         50.))
                     .build();
@@ -160,6 +160,7 @@ impl SimpleState for State {
     fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        self.initialize_characters(world);
         self.initialize_ui(world);
     }
 
