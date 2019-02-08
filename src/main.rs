@@ -10,6 +10,7 @@ use amethyst::input::InputBundle;
 
 mod states;
 mod config;
+mod model;
 
 use crate::states::login::State;
 use crate::config::Request;

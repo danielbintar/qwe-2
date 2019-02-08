@@ -7,6 +7,7 @@ use specs::Entity;
 use std::collections::HashMap;
 
 use crate::config::Request;
+use crate::model::token::Token;
 use super::register::State as RegisterState;
 
 enum Buttons {
@@ -174,25 +175,41 @@ impl State {
         ui_text_storage.get_mut(password).unwrap().password = true;
     }
 
-    fn login(&self, world: &mut World) {
+    fn prepare_login(&self, world: &mut World) -> HashMap<String, String> {
         let mut ui_text_storage = world.write_storage::<UiText>();
         ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = "Request login to server".to_string();
 
         let mut map = HashMap::new();
-        map.insert("username", &ui_text_storage.get(*self.ui_texts.get(&Texts::Username).unwrap()).unwrap().text);
-        map.insert("password", &ui_text_storage.get(*self.ui_texts.get(&Texts::Password).unwrap()).unwrap().text);
+        let username = ui_text_storage.get(*self.ui_texts.get(&Texts::Username).unwrap()).unwrap().text.clone();
+        let password = ui_text_storage.get(*self.ui_texts.get(&Texts::Password).unwrap()).unwrap().text.clone();
+        map.insert("username".to_string(), username);
+        map.insert("password".to_string(), password);
+        map
+    }
 
+    fn after_login(&self, world: &mut World, notice: String) {
+        let mut ui_text_storage = world.write_storage::<UiText>();
+        ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = notice.to_string();
+    }
+
+    fn perform_login(&self, form: HashMap<String, String>, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
         let config = world.read_resource::<Request>();
         let uri = format!("{}{}", config.url, "/users/sign_in");
 
-        let resp = reqwest::Client::new()
+        reqwest::Client::new()
             .post(&uri)
-            .json(&map)
-            .send();
+            .json(&form)
+            .send()
+    }
 
+    fn login(&self, world: &mut World) {
+        let form = self.prepare_login(world);
+        let resp = self.perform_login(form, world);
         let notice = match resp {
-            Ok(resp) => {
+            Ok(mut resp) => {
                 if resp.status().is_success() {
+                    let token: Token = resp.json().unwrap();
+                    world.add_resource(token);
                     "Login Success"
                 } else if resp.status().is_server_error() {
                     "Server is maintenance"
@@ -202,7 +219,7 @@ impl State {
             },
             Err(_) => "Server is maintenance"
         };
-        ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = notice.to_string();
+        self.after_login(world, notice.to_string())
     }
 
 }
