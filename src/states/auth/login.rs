@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use crate::config::Request;
 use crate::model::token::Token;
 use super::register::State as RegisterState;
+use super::super::character::index::State as CharacterState;
 
 enum Buttons {
     Login,
@@ -24,7 +25,8 @@ enum Texts {
 
 pub struct State {
     ui_buttons: HashMap<Entity, Buttons>,
-    ui_texts: HashMap<Texts, Entity>
+    ui_texts: HashMap<Texts, Entity>,
+    login: bool
 }
 
 impl State {
@@ -34,7 +36,8 @@ impl State {
 
         Self {
             ui_buttons: HashMap::with_capacity(btn_count),
-            ui_texts: HashMap::with_capacity(text_count)
+            ui_texts: HashMap::with_capacity(text_count),
+            login: false
         }
     }
 
@@ -187,9 +190,10 @@ impl State {
         map
     }
 
-    fn after_login(&self, world: &mut World, notice: String) {
+    fn after_login(&mut self, world: &mut World, notice: String) {
         let mut ui_text_storage = world.write_storage::<UiText>();
         ui_text_storage.get_mut(*self.ui_texts.get(&Texts::Notice).unwrap()).unwrap().text = notice.to_string();
+        self.login = true
     }
 
     fn perform_login(&self, form: HashMap<String, String>, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
@@ -202,7 +206,7 @@ impl State {
             .send()
     }
 
-    fn login(&self, world: &mut World) {
+    fn login(&mut self, world: &mut World) {
         let form = self.prepare_login(world);
         let resp = self.perform_login(form, world);
         let notice = match resp {
@@ -232,6 +236,13 @@ impl SimpleState for State {
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+        if self.login {
+            data.world.delete_all();
+            return Trans::Switch(Box::new({
+                CharacterState::new()
+            }))
+        }
+
         match event {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
