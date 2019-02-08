@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use reqwest::header;
 
 use super::super::auth::login::State as LoginState;
+use super::create::State as CreateState;
 
 enum Buttons {
     Create,
@@ -28,7 +29,7 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        let btn_count = 1;
+        let btn_count = 1 + general::MAX_MY_CHARACTER;
 
         Self {
             characters: Vec::new(),
@@ -140,6 +141,12 @@ impl State {
         }))
     }
 
+    fn create(&self, world: &mut World) -> SimpleTrans {
+        world.delete_all();
+        Trans::Push(Box::new({
+            CreateState::new()
+        }))
+    }
 }
 
 impl SimpleState for State {
@@ -150,6 +157,12 @@ impl SimpleState for State {
         self.initialize_ui(world);
     }
 
+    fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+
+        self.initialize_ui(world);
+    }
+
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         match event {
             StateEvent::Ui(x) => match x.event_type {
@@ -157,6 +170,7 @@ impl SimpleState for State {
                     if let Some(button) = self.ui_buttons.get(&x.target) {
                         match button {
                             Buttons::Logout => return self.logout(data.world),
+                            Buttons::Create => return self.create(data.world),
                             _ => ()
                         }
                     }
