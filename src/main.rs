@@ -12,7 +12,7 @@ mod states;
 mod config;
 mod model;
 
-use crate::states::login::State;
+use crate::states::auth::login::State;
 use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
