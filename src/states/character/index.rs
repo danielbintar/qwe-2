@@ -1,6 +1,6 @@
 use amethyst::prelude::*;
 use amethyst::assets::{Loader};
-use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder};
+use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, UiEventType::Click};
 
 use specs::Entity;
 
@@ -13,6 +13,8 @@ use std::vec::Vec;
 use std::collections::HashMap;
 
 use reqwest::header;
+
+use super::super::auth::login::State as LoginState;
 
 enum Buttons {
     Create,
@@ -130,6 +132,14 @@ impl State {
             Err(_) => panic!()
         };
     }
+
+    fn logout(&self, world: &mut World) -> SimpleTrans {
+        world.delete_all();
+        Trans::Switch(Box::new({
+            LoginState::new()
+        }))
+    }
+
 }
 
 impl SimpleState for State {
@@ -138,5 +148,23 @@ impl SimpleState for State {
 
         self.initialize_characters(world);
         self.initialize_ui(world);
+    }
+
+    fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+        match event {
+            StateEvent::Ui(x) => match x.event_type {
+                Click => {
+                    if let Some(button) = self.ui_buttons.get(&x.target) {
+                        match button {
+                            Buttons::Logout => return self.logout(data.world),
+                            _ => ()
+                        }
+                    }
+                },
+                _ => (),
+            },
+            _ => (),
+        }
+        Trans::None
     }
 }
