@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use reqwest::header;
 
 use super::super::auth::login::State as LoginState;
+use super::create::State as CreateState;
 
 enum Buttons {
     Create,
@@ -28,7 +29,7 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        let btn_count = 1;
+        let btn_count = 1 + general::MAX_MY_CHARACTER;
 
         Self {
             characters: Vec::new(),
@@ -62,7 +63,6 @@ impl State {
 
 
         for i in 0..general::MAX_MY_CHARACTER {
-            println!("{}", i);
             let x: i32 = (i as i32 - 2) * 200;
 
             if self.characters.len() <= i {
@@ -82,7 +82,7 @@ impl State {
                     .with(transform)
                     .with(UiText::new(
                         font.clone(),
-                        "Character".to_string(),
+                        self.characters[i as usize].get_name(),
                         [1., 1., 1., 1.],
                         50.))
                     .build();
@@ -140,10 +140,23 @@ impl State {
         }))
     }
 
+    fn create(&self, world: &mut World) -> SimpleTrans {
+        world.delete_all();
+        Trans::Push(Box::new({
+            CreateState::new()
+        }))
+    }
 }
 
 impl SimpleState for State {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        let world = data.world;
+
+        self.initialize_characters(world);
+        self.initialize_ui(world);
+    }
+
+    fn on_resume(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
         self.initialize_characters(world);
@@ -157,7 +170,7 @@ impl SimpleState for State {
                     if let Some(button) = self.ui_buttons.get(&x.target) {
                         match button {
                             Buttons::Logout => return self.logout(data.world),
-                            _ => ()
+                            Buttons::Create => return self.create(data.world)
                         }
                     }
                 },
