@@ -4,7 +4,6 @@ use amethyst::{
     input::InputHandler
 };
 
-
 use crate::components::player::Player;
 
 pub struct Movement;
