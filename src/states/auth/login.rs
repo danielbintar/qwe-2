@@ -1,8 +1,9 @@
-use amethyst::prelude::*;
-use amethyst::assets::{Loader};
-use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, UiButtonBuilder, UiEventType::Click};
-
-use specs::Entity;
+use amethyst::{
+    prelude::*,
+    assets::{Loader},
+    ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, UiButtonBuilder, UiEventType::Click},
+    ecs::Entity
+};
 
 use std::collections::HashMap;
 
@@ -231,6 +232,8 @@ impl State {
 impl SimpleState for State {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
+
+        world.register::<crate::components::player::Player>();
 
         self.initialize_ui(world);
     }

@@ -1,8 +1,9 @@
-use amethyst::prelude::*;
-use amethyst::assets::{Loader};
-use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, UiEventType::Click};
-
-use specs::Entity;
+use amethyst::{
+    prelude::*,
+    assets::Loader,
+    ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, UiEventType::Click},
+    ecs::Entity
+};
 
 use crate::config::Request;
 use crate::model::token::Token;
@@ -15,10 +16,12 @@ use std::collections::HashMap;
 use reqwest::header;
 
 use super::super::auth::login::State as LoginState;
+use super::super::town::cimahi::State as CimahiState;
 use super::create::State as CreateState;
 
 enum Buttons {
     Create,
+    Enter(usize),
     Logout
 }
 
@@ -91,7 +94,7 @@ impl State {
                     .with_anchor(Anchor::TopMiddle)
                     .with_position(x as f32, -400.);
                 let button = button_builder.build_from_world(world);
-                self.ui_buttons.insert(button, Buttons::Create);
+                self.ui_buttons.insert(button, Buttons::Enter(self.characters[i as usize].get_id()));
             }
         }
 
@@ -146,6 +149,13 @@ impl State {
             CreateState::new()
         }))
     }
+
+    fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
+        world.delete_all();
+        Trans::Switch(Box::new({
+            CimahiState::new()
+        }))
+    }
 }
 
 impl SimpleState for State {
@@ -170,7 +180,8 @@ impl SimpleState for State {
                     if let Some(button) = self.ui_buttons.get(&x.target) {
                         match button {
                             Buttons::Logout => return self.logout(data.world),
-                            Buttons::Create => return self.create(data.world)
+                            Buttons::Create => return self.create(data.world),
+                            Buttons::Enter(x) => return self.enter(data.world, x.clone())
                         }
                     }
                 },
