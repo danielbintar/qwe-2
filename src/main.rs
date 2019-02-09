@@ -1,5 +1,4 @@
 extern crate amethyst;
-extern crate specs;
 extern crate reqwest;
 
 use amethyst::{
@@ -22,7 +21,7 @@ use crate::systems::movement::Movement as MovementSystem;
 use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
-    // amethyst::start_logger(Default::default());
+    amethyst::start_logger(Default::default());
 
     let config = DisplayConfig::load("./config/display.ron");
     let request_config = Request::load("./config/request.ron");

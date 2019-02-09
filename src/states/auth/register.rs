@@ -1,8 +1,9 @@
-use amethyst::prelude::*;
-use amethyst::assets::{Loader};
-use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, TextEditing, UiEventType::Click};
-
-use specs::Entity;
+use amethyst::{
+    prelude::*,
+    assets::Loader,
+    ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, TextEditing, UiEventType::Click},
+    ecs::Entity
+};
 
 use std::collections::HashMap;
 

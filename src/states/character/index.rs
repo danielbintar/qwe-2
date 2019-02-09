@@ -1,8 +1,9 @@
-use amethyst::prelude::*;
-use amethyst::assets::{Loader};
-use amethyst::ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, UiEventType::Click};
-
-use specs::Entity;
+use amethyst::{
+    prelude::*,
+    assets::Loader,
+    ui::{UiTransform, Anchor, UiText, TtfFormat, UiButtonBuilder, UiEventType::Click},
+    ecs::Entity
+};
 
 use crate::config::Request;
 use crate::model::token::Token;
