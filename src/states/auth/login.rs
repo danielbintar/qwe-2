@@ -232,6 +232,8 @@ impl SimpleState for State {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        world.register::<crate::components::player::Player>();
+
         self.initialize_ui(world);
     }
 
