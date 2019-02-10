@@ -43,6 +43,7 @@ impl SimpleState for State {
 	fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        super::super::init_chat_ui(world);
         let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
         let _reference = init_reference_sprite(world, &player_sprite);
         let parent = init_player(world, &player_sprite);
