@@ -15,4 +15,8 @@ impl Payload {
 	pub fn get_message(&self) -> String {
 		self.message.clone()
 	}
+
+	pub fn get_full_message(&self) -> String {
+		self.message.clone()
+	}
 }

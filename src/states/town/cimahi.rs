@@ -15,7 +15,8 @@ use crate::components::player::Player;
 
 pub struct State {
     chat_button: Option<Entity>,
-    chat_input: Option<Entity>
+    chat_input: Option<Entity>,
+    chat_show: Option<Entity>
 }
 
 fn init_reference_sprite(world: &mut World, sprite_sheet: &SpriteSheetHandle) -> Entity {
@@ -38,7 +39,8 @@ impl State {
     pub fn new() -> Self {
         Self {
             chat_button: None,
-            chat_input: None
+            chat_input: None,
+            chat_show: None
         }
     }
 }
@@ -58,6 +60,14 @@ impl ChatState for State {
 
     fn set_chat_input(&mut self, e: Entity) {
         self.chat_input = Some(e)
+    }
+
+    fn get_chat_show(&self) -> Entity {
+        self.chat_show.unwrap()
+    }
+
+    fn set_chat_show(&mut self, e: Entity) {
+        self.chat_show = Some(e)
     }
 }
 
