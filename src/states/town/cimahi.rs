@@ -62,8 +62,13 @@ impl SimpleState for State {
         init_camera(world, parent);
     }
 
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
+        self.handle_receive_chat(data.world);
+        Trans::None
+    }
+
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
-        self.handle_chat(data.world, event);
+        self.handle_send_chat(data.world, event);
         Trans::None
     }
 }

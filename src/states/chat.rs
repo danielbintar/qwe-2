@@ -49,9 +49,7 @@ pub trait ChatState {
         self.set_chat_button(button);
     }
 
-    
-
-    fn handle_chat(&self, world: &mut World, event: StateEvent) {
+    fn handle_send_chat(&self, world: &mut World, event: StateEvent) {
         match event {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
@@ -63,6 +61,15 @@ pub trait ChatState {
                 _ => (),
             },
             _ => (),
+        }
+    }
+
+    fn handle_receive_chat(&self, world: &mut World) {
+        let r = world.read_resource::<crate::model::chat::resource::Resource>();
+        let received = r.rx.lock().unwrap().try_recv();
+        match received {
+            Ok(msg) => println!("{}", msg),
+            Err(_) => {}
         }
     }
 }
