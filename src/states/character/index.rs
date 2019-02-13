@@ -12,8 +12,16 @@ use crate::general;
 
 use std::vec::Vec;
 use std::collections::HashMap;
+use std::thread;
+
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::mpsc;
 
 use reqwest::header;
+
+use ws::connect;
+use ws::{Frame, Handler, Sender, Handshake, Result, Message};
 
 use super::super::auth::login::State as LoginState;
 use super::super::town::cimahi::State as CimahiState;
@@ -151,6 +159,17 @@ impl State {
     }
 
     fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
+        let (tx_receive, rx_receive) = mpsc::channel();
+        let (tx_send, rx_send) = mpsc::channel();
+        let sender = Arc::new(Mutex::new(tx_send));
+        let receiver = Arc::new(Mutex::new(rx_receive));
+        let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+        world.add_resource(r);
+
+        thread::spawn(move || {
+            connect("ws://127.0.0.1:3333/chat", |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send) ).unwrap()
+        });
+
         world.delete_all();
         Trans::Switch(Box::new({
             CimahiState::new()

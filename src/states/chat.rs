@@ -56,7 +56,8 @@ pub trait ChatState {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
                     if(x.target == self.get_chat_button()) {
-                        println!("niceeee");
+                        let r = world.read_resource::<crate::model::chat::resource::Resource>();
+                        r.tx.lock().unwrap().send("a".to_string());
                     }
                 },
                 _ => (),

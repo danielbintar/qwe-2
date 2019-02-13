@@ -1,8 +1,8 @@
-pub struct Chat {
+pub struct Payload {
 	message: String
 }
 
-impl Chat {
+impl Payload {
 	pub fn new(message: String) -> Self {
 		Self {
 			message,
