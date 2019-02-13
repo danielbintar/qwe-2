@@ -12,6 +12,8 @@ use serde::{Serialize, Deserialize};
 pub trait ChatState {
     fn get_chat_button(&self) -> Entity;
     fn set_chat_button(&mut self, e: Entity);
+    fn get_chat_input(&self) -> Entity;
+    fn set_chat_input(&mut self, e: Entity);
 
     fn init_chat_ui(&mut self, world: &mut World) {
         let font = world.read_resource::<Loader>().load(
@@ -34,7 +36,7 @@ pub trait ChatState {
                 20.);
         chat_input_text.line_mode = Wrap;
 
-        world
+        let chat_input = world
             .create_entity()
             .with(transform)
             .with(chat_input_text)
@@ -44,6 +46,7 @@ pub trait ChatState {
                 [0.0, 0.0, 0.0, 1.0],
                 false))
             .build();
+        self.set_chat_input(chat_input);
 
 
         let button_builder = UiButtonBuilder::new("chat_button", "Send")
@@ -58,8 +61,10 @@ pub trait ChatState {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
                     if(x.target == self.get_chat_button()) {
+                        let mut ui_text_storage = world.write_storage::<UiText>();
+                        let message = ui_text_storage.get(self.get_chat_input()).unwrap().text.clone();
                         let r = world.read_resource::<crate::model::chat::resource::Resource>();
-                        let payload = Payload::new("a".to_string());
+                        let payload = Payload::new(message);
                         r.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap());
                     }
                 },
