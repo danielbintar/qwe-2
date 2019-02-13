@@ -5,6 +5,10 @@ use amethyst::{
     ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, LineMode::Wrap, UiButtonBuilder, UiEventType::Click}
 };
 
+use crate::model::chat::payload::Payload;
+
+use serde::{Serialize, Deserialize};
+
 pub trait ChatState {
     fn get_chat_button(&self) -> Entity;
     fn set_chat_button(&mut self, e: Entity);
@@ -55,7 +59,8 @@ pub trait ChatState {
                 Click => {
                     if(x.target == self.get_chat_button()) {
                         let r = world.read_resource::<crate::model::chat::resource::Resource>();
-                        r.tx.lock().unwrap().send("a".to_string());
+                        let payload = Payload::new("a".to_string());
+                        r.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap());
                     }
                 },
                 _ => (),
