@@ -115,7 +115,7 @@ impl State {
 
     fn request_characters(&self, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
         let config = world.read_resource::<Request>();
-        let uri = format!("{}{}", config.url, "/my-characters");
+        let uri = format!("{}{}", config.api_url, "/my-characters");
 
         let mut headers = header::HeaderMap::new();
         let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
@@ -167,8 +167,9 @@ impl State {
         let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
         world.add_resource(r);
 
+        let uri = get_chat_link(world);
         thread::spawn(move || {
-            connect("ws://127.0.0.1:3333/chat", |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+            connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
         });
 
         world.delete_all();
@@ -176,6 +177,11 @@ impl State {
             CimahiState::new()
         }))
     }
+}
+
+fn get_chat_link(world: &mut World) -> String {
+    let config = world.read_resource::<Request>();
+    format!("{}{}", config.ws_url, "/chat")
 }
 
 impl SimpleState for State {

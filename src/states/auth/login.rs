@@ -198,7 +198,7 @@ impl State {
 
     fn perform_login(&self, form: HashMap<String, String>, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
         let config = world.read_resource::<Request>();
-        let uri = format!("{}{}", config.url, "/users/sign_in");
+        let uri = format!("{}{}", config.api_url, "/users/sign_in");
 
         reqwest::Client::new()
             .post(&uri)
