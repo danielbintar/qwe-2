@@ -164,10 +164,11 @@ impl State {
         let sender = Arc::new(Mutex::new(tx_send));
         let receiver = Arc::new(Mutex::new(rx_receive));
         let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+        let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
         world.add_resource(r);
 
         thread::spawn(move || {
-            connect("ws://127.0.0.1:3333/chat", |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send) ).unwrap()
+            connect("ws://127.0.0.1:3333/chat", |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
         });
 
         world.delete_all();

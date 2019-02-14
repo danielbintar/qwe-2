@@ -2,12 +2,14 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Payload {
+	sender: String,
 	message: String
 }
 
 impl Payload {
 	pub fn new(message: String) -> Self {
 		Self {
+			sender: "".to_string(),
 			message,
 		}
 	}
@@ -17,6 +19,6 @@ impl Payload {
 	}
 
 	pub fn get_full_message(&self) -> String {
-		self.message.clone()
+		format!("{}: {}", self.sender, self.message)
 	}
 }
