@@ -184,7 +184,7 @@ impl State {
         map.insert("password", &ui_text_storage.get(*self.ui_texts.get(&Texts::Password).unwrap()).unwrap().text);
 
         let config = world.read_resource::<Request>();
-        let uri = format!("{}{}", config.url, "/users/sign_up");
+        let uri = format!("{}{}", config.api_url, "/users/sign_up");
 
         let resp = reqwest::Client::new()
             .post(&uri)

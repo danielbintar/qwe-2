@@ -145,7 +145,7 @@ impl State {
 
     fn perform_create(&self, form: HashMap<String, String>, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
         let config = world.read_resource::<Request>();
-        let uri = format!("{}{}", config.url, "/my-characters");
+        let uri = format!("{}{}", config.api_url, "/my-characters");
 
         let mut headers = header::HeaderMap::new();
         let token = format!("Bearer {}", world.read_resource::<Token>().get_token());

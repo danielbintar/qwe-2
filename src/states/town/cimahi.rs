@@ -10,10 +10,13 @@ use amethyst::{
     }
 };
 
+use super::super::chat::ChatState;
 use crate::components::player::Player;
 
 pub struct State {
-    
+    chat_button: Option<Entity>,
+    chat_input: Option<Entity>,
+    chat_show: Option<Entity>
 }
 
 fn init_reference_sprite(world: &mut World, sprite_sheet: &SpriteSheetHandle) -> Entity {
@@ -35,7 +38,36 @@ fn init_reference_sprite(world: &mut World, sprite_sheet: &SpriteSheetHandle) ->
 impl State {
     pub fn new() -> Self {
         Self {
+            chat_button: None,
+            chat_input: None,
+            chat_show: None
         }
+    }
+}
+
+impl ChatState for State {
+    fn get_chat_button(&self) -> Entity {
+        self.chat_button.unwrap()
+    }
+
+    fn set_chat_button(&mut self, e: Entity) {
+        self.chat_button = Some(e)
+    }
+
+    fn get_chat_input(&self) -> Entity {
+        self.chat_input.unwrap()
+    }
+
+    fn set_chat_input(&mut self, e: Entity) {
+        self.chat_input = Some(e)
+    }
+
+    fn get_chat_show(&self) -> Entity {
+        self.chat_show.unwrap()
+    }
+
+    fn set_chat_show(&mut self, e: Entity) {
+        self.chat_show = Some(e)
     }
 }
 
@@ -43,10 +75,21 @@ impl SimpleState for State {
 	fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        self.init_chat_ui(world);
         let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
         let _reference = init_reference_sprite(world, &player_sprite);
         let parent = init_player(world, &player_sprite);
         init_camera(world, parent);
+    }
+
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
+        self.handle_receive_chat(data.world);
+        Trans::None
+    }
+
+    fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+        self.handle_send_chat(data.world, event);
+        Trans::None
     }
 }
 

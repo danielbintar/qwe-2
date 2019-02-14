@@ -12,8 +12,15 @@ use crate::general;
 
 use std::vec::Vec;
 use std::collections::HashMap;
+use std::thread;
+
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::mpsc;
 
 use reqwest::header;
+
+use ws::connect;
 
 use super::super::auth::login::State as LoginState;
 use super::super::town::cimahi::State as CimahiState;
@@ -107,7 +114,7 @@ impl State {
 
     fn request_characters(&self, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
         let config = world.read_resource::<Request>();
-        let uri = format!("{}{}", config.url, "/my-characters");
+        let uri = format!("{}{}", config.api_url, "/my-characters");
 
         let mut headers = header::HeaderMap::new();
         let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
@@ -150,12 +157,30 @@ impl State {
         }))
     }
 
-    fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
+    fn enter(&self, world: &mut World, _id: usize) -> SimpleTrans {
+        let (tx_receive, rx_receive) = mpsc::channel();
+        let (tx_send, rx_send) = mpsc::channel();
+        let sender = Arc::new(Mutex::new(tx_send));
+        let receiver = Arc::new(Mutex::new(rx_receive));
+        let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+        let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+        world.add_resource(r);
+
+        let uri = get_chat_link(world);
+        thread::spawn(move || {
+            connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+        });
+
         world.delete_all();
         Trans::Switch(Box::new({
             CimahiState::new()
         }))
     }
+}
+
+fn get_chat_link(world: &mut World) -> String {
+    let config = world.read_resource::<Request>();
+    format!("{}{}", config.ws_url, "/chat")
 }
 
 impl SimpleState for State {
