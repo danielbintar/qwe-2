@@ -21,7 +21,6 @@ use std::sync::mpsc;
 use reqwest::header;
 
 use ws::connect;
-use ws::{Frame, Handler, Sender, Handshake, Result, Message};
 
 use super::super::auth::login::State as LoginState;
 use super::super::town::cimahi::State as CimahiState;
@@ -158,7 +157,7 @@ impl State {
         }))
     }
 
-    fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
+    fn enter(&self, world: &mut World, _id: usize) -> SimpleTrans {
         let (tx_receive, rx_receive) = mpsc::channel();
         let (tx_send, rx_send) = mpsc::channel();
         let sender = Arc::new(Mutex::new(tx_send));

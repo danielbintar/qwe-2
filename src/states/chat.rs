@@ -5,9 +5,8 @@ use amethyst::{
     ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, LineMode::Wrap, UiButtonBuilder, UiEventType::Click}
 };
 
-use crate::model::chat::payload::Payload;
-
-use serde::{Serialize, Deserialize};
+use crate::model::chat::payload::ResponsePayload;
+use crate::model::chat::payload::RequestPayload;
 
 pub trait ChatState {
     fn get_chat_button(&self) -> Entity;
@@ -82,12 +81,12 @@ pub trait ChatState {
         match event {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
-                    if(x.target == self.get_chat_button()) {
-                        let mut ui_text_storage = world.write_storage::<UiText>();
+                    if x.target == self.get_chat_button() {
+                        let ui_text_storage = world.write_storage::<UiText>();
                         let message = ui_text_storage.get(self.get_chat_input()).unwrap().text.clone();
                         let r = world.read_resource::<crate::model::chat::resource::Resource>();
-                        let payload = Payload::new(message);
-                        r.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap());
+                        let payload = RequestPayload::new(message);
+                        r.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
                     }
                 },
                 _ => (),
@@ -101,7 +100,7 @@ pub trait ChatState {
         let received = r.rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
-                let payload: Payload = serde_json::from_str(&msg).unwrap();
+                let payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
                 let mut ui_text_storage = world.write_storage::<UiText>();
                 let t = ui_text_storage.get_mut(self.get_chat_show()).unwrap();
                 t.text.push_str(&payload.get_full_message());
