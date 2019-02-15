@@ -157,7 +157,9 @@ impl State {
         }))
     }
 
-    fn enter(&self, world: &mut World, _id: usize) -> SimpleTrans {
+    fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
+        request_enter(world, id);
+
         let (tx_receive, rx_receive) = mpsc::channel();
         let (tx_send, rx_send) = mpsc::channel();
         let sender = Arc::new(Mutex::new(tx_send));
@@ -176,6 +178,22 @@ impl State {
             CimahiState::new()
         }))
     }
+}
+
+fn request_enter(world: &mut World, id: usize) {
+    let config = world.read_resource::<Request>();
+    let uri = format!("{}{}{}/play", config.api_url, "/my-characters/", id);
+
+    let mut headers = header::HeaderMap::new();
+    let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+    headers.insert(header::AUTHORIZATION, header::HeaderValue::from_str(&token).unwrap());
+
+    reqwest::Client::builder()
+        .default_headers(headers)
+        .build().unwrap()
+        .post(&uri)
+        .send()
+        .unwrap();
 }
 
 fn get_chat_link(world: &mut World) -> String {
