@@ -15,6 +15,7 @@ use amethyst::{
 
 use crate::model::chat::payload::ResponsePayload;
 use crate::model::chat::payload::RequestPayload;
+use crate::model::character::Character;
 use crate::model::character::CharacterPosition;
 use crate::components::player::Player;
 
@@ -25,12 +26,12 @@ pub trait HasCharacters {
     fn init_characters_ui(&mut self, world: &mut World) {
         let characters = self.get_characters_position();
 
+        let current_character_id = world.read_resource::<Character>().get_id();
         let mut parent: Option<Entity> = None;
 
         for character in &characters {
-            println!("{}", character.get_id());
             let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
-            if character.get_id() == 1 {
+            if character.get_id() == current_character_id {
                 parent = Some(init_main_player(world, &player_sprite, character));
             } else {
                 init_player(world, &player_sprite, character);

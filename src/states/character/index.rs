@@ -28,7 +28,7 @@ use super::create::State as CreateState;
 
 enum Buttons {
     Create,
-    Enter(usize),
+    Enter(Character),
     Logout
 }
 
@@ -101,7 +101,7 @@ impl State {
                     .with_anchor(Anchor::TopMiddle)
                     .with_position(x as f32, -400.);
                 let button = button_builder.build_from_world(world);
-                self.ui_buttons.insert(button, Buttons::Enter(self.characters[i as usize].get_id()));
+                self.ui_buttons.insert(button, Buttons::Enter(self.characters[i].clone()));
             }
         }
 
@@ -157,8 +157,8 @@ impl State {
         }))
     }
 
-    fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
-        request_enter(world, id);
+    fn enter(&self, world: &mut World, character: Character) -> SimpleTrans {
+        request_enter(world, character.get_id());
 
         let (tx_receive, rx_receive) = mpsc::channel();
         let (tx_send, rx_send) = mpsc::channel();
@@ -167,6 +167,7 @@ impl State {
         let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
         let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
         world.add_resource(r);
+        world.add_resource(character);
 
         let uri = get_chat_link(world);
         thread::spawn(move || {
@@ -224,7 +225,7 @@ impl SimpleState for State {
                         match button {
                             Buttons::Logout => return self.logout(data.world),
                             Buttons::Create => return self.create(data.world),
-                            Buttons::Enter(x) => return self.enter(data.world, x.clone())
+                            Buttons::Enter(y) => return self.enter(data.world, (*y).clone())
                         }
                     }
                 },
