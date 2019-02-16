@@ -10,7 +10,7 @@ use amethyst::{
     }
 };
 
-use super::super::chat::ChatState;
+use super::super::has_chat::HasChat;
 use crate::components::player::Player;
 
 pub struct State {
@@ -45,7 +45,7 @@ impl State {
     }
 }
 
-impl ChatState for State {
+impl HasChat for State {
     fn get_chat_button(&self) -> Entity {
         self.chat_button.unwrap()
     }
