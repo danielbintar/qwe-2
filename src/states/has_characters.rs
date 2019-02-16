@@ -15,14 +15,28 @@ use amethyst::{
 
 use crate::model::chat::payload::ResponsePayload;
 use crate::model::chat::payload::RequestPayload;
+use crate::model::character::CharacterPosition;
 use crate::components::player::Player;
 
 pub trait HasCharacters {
+    fn set_characters_position(&mut self, c: Vec<CharacterPosition>);
+    fn get_characters_position(&self) -> Vec<CharacterPosition>;
+
     fn init_characters_ui(&mut self, world: &mut World) {
-        let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
-        let _reference = init_reference_sprite(world, &player_sprite);
-        let parent = init_player(world, &player_sprite);
-        init_camera(world, parent);
+        let characters = self.get_characters_position();
+
+        let mut parent: Option<Entity> = None;
+
+        for character in &characters {
+            println!("{}", character.get_id());
+            let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
+            if character.get_id() == 1 {
+                parent = Some(init_main_player(world, &player_sprite, character));
+            } else {
+                init_player(world, &player_sprite, character);
+            }
+        }
+        init_camera(world, parent.unwrap());
     }
 }
 
@@ -39,10 +53,10 @@ fn init_camera(world: &mut World, parent: Entity) {
         .build();
 }
 
-fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle) -> Entity {
+fn init_main_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &CharacterPosition) -> Entity {
     let mut transform = Transform::default();
-    transform.set_x(0.0);
-    transform.set_y(0.0);
+    transform.set_x(character.get_x() as f32);
+    transform.set_y(character.get_y() as f32);
     let sprite = SpriteRender {
         sprite_sheet: sprite_sheet.clone(),
         sprite_number: 0,
@@ -56,7 +70,21 @@ fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle) -> Entity {
         .build()
 }
 
-
+fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &CharacterPosition) -> Entity {
+    let mut transform = Transform::default();
+    transform.set_x(character.get_x() as f32);
+    transform.set_y(character.get_y() as f32);
+    let sprite = SpriteRender {
+        sprite_sheet: sprite_sheet.clone(),
+        sprite_number: 0,
+    };
+    world
+        .create_entity()
+        .with(transform)
+        .with(sprite)
+        .with(Transparent)
+        .build()
+}
 
 fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
     let texture_handle = {
