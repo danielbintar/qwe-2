@@ -164,7 +164,7 @@ impl State {
         let (tx_send, rx_send) = mpsc::channel();
         let sender = Arc::new(Mutex::new(tx_send));
         let receiver = Arc::new(Mutex::new(rx_receive));
-        let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+        let r = crate::resources::chat::Chat::new(Arc::clone(&sender), Arc::clone(&receiver));
         let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
         world.add_resource(r);
 

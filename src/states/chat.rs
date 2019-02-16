@@ -84,7 +84,7 @@ pub trait ChatState {
                     if x.target == self.get_chat_button() {
                         let ui_text_storage = world.write_storage::<UiText>();
                         let message = ui_text_storage.get(self.get_chat_input()).unwrap().text.clone();
-                        let r = world.read_resource::<crate::model::chat::resource::Resource>();
+                        let r = world.read_resource::<crate::resources::chat::Chat>();
                         let payload = RequestPayload::new(message);
                         r.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
                     }
@@ -96,7 +96,7 @@ pub trait ChatState {
     }
 
     fn handle_receive_chat(&self, world: &mut World) {
-        let r = world.read_resource::<crate::model::chat::resource::Resource>();
+        let r = world.read_resource::<crate::resources::chat::Chat>();
         let received = r.rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {

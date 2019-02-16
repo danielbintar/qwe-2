@@ -12,6 +12,7 @@ use amethyst::{
 mod states;
 mod config;
 mod model;
+mod resources;
 mod general;
 mod components;
 mod systems;
