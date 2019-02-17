@@ -13,13 +13,18 @@ use crate::model::movement::payload::RequestPayload as RequestPayload;
 use crate::general;
 
 pub struct Movement {
-    counter: usize
+
+}
+
+#[derive(Default)]
+pub struct AllowMoving {
+    pub allowed: bool
 }
 
 impl Movement {
     pub fn new() -> Self {
         Self {
-            counter: 0
+
         }
     }
 }
@@ -31,9 +36,10 @@ impl<'s> System<'s> for Movement {
         Read<'s, MovementClient>,
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<String, String>>,
+        Read<'s, AllowMoving>,
     );
 
-    fn run(&mut self, (players, character, movement_client, mut transforms, input): Self::SystemData) {
+    fn run(&mut self, (players, character, movement_client, mut transforms, input, allow_moving): Self::SystemData) {
         let received = movement_client.rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
@@ -51,25 +57,21 @@ impl<'s> System<'s> for Movement {
             Err(_) => {}
         }
 
-        self.counter += 1;
-        if self.counter < 10 {
+        if !allow_moving.allowed {
             return;
         }
-        self.counter = 0;
 
         let x_move = input.axis_value("entity_x").unwrap();
         let y_move = input.axis_value("entity_y").unwrap();
 
         if x_move != 0.0 || y_move != 0.0 {
-            for (_, transform) in (&players, &mut transforms).join() {
-                let payload = RequestPayload {
-                    id: character.get_id(),
-                    x: x_move as isize,
-                    y: y_move as isize
-                };
+            let payload = RequestPayload {
+                id: character.get_id(),
+                x: x_move as isize,
+                y: y_move as isize
+            };
 
-                movement_client.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
-            }
+            movement_client.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
         }
     }
 }

@@ -14,8 +14,6 @@ use crate::model::character::CharacterPosition;
 
 #[derive(Deserialize)]
 pub struct Town {
-    id: usize,
-    name: String,
     characters: Vec<CharacterPosition>
 }
 
@@ -23,6 +21,7 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
     fn get_town_id(&self) -> usize;
 
     fn init_town(&mut self, world: &mut World) {
+        world.add_resource(crate::systems::movement::AllowMoving{allowed: true});
         let resp = self.request_town(world);
         match resp {
             Ok(mut resp) => {
