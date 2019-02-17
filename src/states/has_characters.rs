@@ -1,12 +1,10 @@
 use amethyst::{
     prelude::*,
-    assets::{AssetStorage, Loader},
     ecs::Entity,
     core::{Parent, Transform},
     renderer::{
-        Camera, PngFormat, Projection,
-        SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle,
-        Texture, TextureMetadata, Transparent
+        Camera, Projection,
+        SpriteRender, SpriteSheetHandle, Transparent
     }
 };
 
@@ -26,7 +24,7 @@ pub trait HasCharacters {
         let mut parent: Option<Entity> = None;
 
         for character in &characters {
-            let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
+            let player_sprite = super::load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
             let player = init_player(world, &player_sprite, character);
             if character.get_id() == current_character_id {
                 parent = Some(player);
@@ -64,27 +62,4 @@ fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &
         .with(Player::new(character.get_id()))
         .with(Transparent)
         .build()
-}
-
-fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
-    let texture_handle = {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-        loader.load(
-            png_path,
-            PngFormat,
-            TextureMetadata::srgb_scale(),
-            (),
-            &texture_storage,
-        )
-    };
-    let loader = world.read_resource::<Loader>();
-    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
-    loader.load(
-        ron_path,
-        SpriteSheetFormat,
-        texture_handle,
-        (),
-        &sprite_sheet_store,
-    )
 }
