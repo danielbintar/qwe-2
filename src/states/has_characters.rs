@@ -13,6 +13,7 @@ use amethyst::{
     }
 };
 
+use crate::general;
 use crate::model::chat::payload::ResponsePayload;
 use crate::model::chat::payload::RequestPayload;
 use crate::model::character::Character;
@@ -55,8 +56,8 @@ fn init_camera(world: &mut World, parent: Entity) {
 
 fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &CharacterPosition) -> Entity {
     let mut transform = Transform::default();
-    transform.set_x(character.get_x() as f32);
-    transform.set_y(character.get_y() as f32);
+    transform.set_x((character.get_x() * general::GRID_SCALE_X) as f32);
+    transform.set_y((character.get_y() * general::GRID_SCALE_Y) as f32);
     let sprite = SpriteRender {
         sprite_sheet: sprite_sheet.clone(),
         sprite_number: 0,

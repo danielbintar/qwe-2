@@ -9,6 +9,8 @@ use crate::model::movement::resource::Resource as MovementClient;
 use crate::model::character::{Character, CharacterPosition};
 use crate::model::movement::payload::RequestPayload as RequestPayload;
 
+
+use crate::general;
 use std::default::Default;
 
 pub struct Movement {
@@ -41,8 +43,8 @@ impl<'s> System<'s> for Movement {
                     let position: CharacterPosition = serde_json::from_str(&decoded_position).unwrap();
                     for (player, transform) in (&players, &mut transforms).join() {
                         if player.get_id() == position.get_id() {
-                            transform.set_x(position.get_x() as f32 * 5.0);
-                            transform.set_y(position.get_y() as f32 * 5.0);
+                            transform.set_x((position.get_x() * general::GRID_SCALE_X) as f32);
+                            transform.set_y((position.get_y() * general::GRID_SCALE_Y) as f32);
                         }
                     }
                 }
