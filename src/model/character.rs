@@ -1,6 +1,6 @@
-use serde_derive::{Deserialize};
+use serde_derive::{Serialize, Deserialize};
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Default)]
 pub struct Character {
     id: usize,
     name: String

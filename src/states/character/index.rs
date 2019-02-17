@@ -160,25 +160,45 @@ impl State {
     fn enter(&self, world: &mut World, character: Character) -> SimpleTrans {
         request_enter(world, character.get_id());
 
-        let (tx_receive, rx_receive) = mpsc::channel();
-        let (tx_send, rx_send) = mpsc::channel();
-        let sender = Arc::new(Mutex::new(tx_send));
-        let receiver = Arc::new(Mutex::new(rx_receive));
-        let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
-        let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
-        world.add_resource(r);
+        init_chat(world);
+        init_movement(world);
         world.add_resource(character);
-
-        let uri = get_chat_link(world);
-        thread::spawn(move || {
-            connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
-        });
 
         world.delete_all();
         Trans::Switch(Box::new({
             CimahiState::new()
         }))
     }
+}
+
+fn init_chat(world: &mut World) {
+    let (tx_receive, rx_receive) = mpsc::channel();
+    let (tx_send, rx_send) = mpsc::channel();
+    let sender = Arc::new(Mutex::new(tx_send));
+    let receiver = Arc::new(Mutex::new(rx_receive));
+    let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+    let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+    world.add_resource(r);
+
+    let uri = get_chat_link(world);
+    thread::spawn(move || {
+        connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+    });
+}
+
+fn init_movement(world: &mut World) {
+    let (tx_receive, rx_receive) = mpsc::channel();
+    let (tx_send, rx_send) = mpsc::channel();
+    let sender = Arc::new(Mutex::new(tx_send));
+    let receiver = Arc::new(Mutex::new(rx_receive));
+    let r = crate::model::movement::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+    let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+    world.add_resource(r);
+
+    let uri = get_movement_link(world);
+    thread::spawn(move || {
+        connect(uri, |out| crate::model::movement::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+    });
 }
 
 fn request_enter(world: &mut World, id: usize) {
@@ -200,6 +220,11 @@ fn request_enter(world: &mut World, id: usize) {
 fn get_chat_link(world: &mut World) -> String {
     let config = world.read_resource::<Request>();
     format!("{}{}", config.ws_url, "/chat")
+}
+
+fn get_movement_link(world: &mut World) -> String {
+    let config = world.read_resource::<Request>();
+    format!("{}{}", config.ws_url, "/move")
 }
 
 impl SimpleState for State {
