@@ -3,9 +3,6 @@ use amethyst::{
     assets::{AssetStorage, Loader},
     ecs::Entity,
     core::{Parent, Transform},
-    ui::{UiTransform, Anchor, UiText,
-        TtfFormat, TextEditing, LineMode::Wrap,
-        UiButtonBuilder, UiEventType::Click},
     renderer::{
         Camera, PngFormat, Projection,
         SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle,
@@ -14,8 +11,6 @@ use amethyst::{
 };
 
 use crate::general;
-use crate::model::chat::payload::ResponsePayload;
-use crate::model::chat::payload::RequestPayload;
 use crate::model::character::Character;
 use crate::model::character::CharacterPosition;
 use crate::components::player::Player;

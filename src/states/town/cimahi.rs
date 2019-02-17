@@ -1,20 +1,12 @@
 use amethyst::{
     prelude::*,
-    assets::{AssetStorage, Loader},
-    core::{Parent, Transform},
     ecs::Entity,
-    renderer::{
-        Camera, PngFormat, Projection,
-        SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle,
-        Texture, TextureMetadata, Transparent
-    }
 };
 
 use super::super::has_chat::HasChat;
 use super::super::has_characters::HasCharacters;
 use super::IsTown;
 use crate::model::character::CharacterPosition;
-use crate::components::player::Player;
 
 pub struct State {
     chat_button: Option<Entity>,

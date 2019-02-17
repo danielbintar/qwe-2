@@ -11,7 +11,6 @@ use crate::model::movement::payload::RequestPayload as RequestPayload;
 
 
 use crate::general;
-use std::default::Default;
 
 pub struct Movement {
     counter: usize

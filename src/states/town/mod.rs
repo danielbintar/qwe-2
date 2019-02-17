@@ -1,16 +1,6 @@
 pub mod cimahi;
 
-use amethyst::{
-    prelude::*,
-    assets::{AssetStorage, Loader},
-    core::{Parent, Transform},
-    ecs::Entity,
-    renderer::{
-        Camera, PngFormat, Projection,
-        SpriteRender, SpriteSheet, SpriteSheetFormat, SpriteSheetHandle,
-        Texture, TextureMetadata, Transparent
-    }
-};
+use amethyst::prelude::*;
 
 use reqwest::header;
 

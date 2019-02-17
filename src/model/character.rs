@@ -1,4 +1,4 @@
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::Deserialize;
 
 #[derive(Deserialize, Clone, Default)]
 pub struct Character {
