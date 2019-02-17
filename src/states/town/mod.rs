@@ -47,16 +47,21 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
     }
 
     fn init_background(&self, world: &mut World) {
-        let sprite_sheet = super::load_sprite_sheet(world, "./resources/tiles/floor.png", "./resources/tiles/floor.ron");
+        let floor_sprite_sheet = super::load_sprite_sheet(world, "./resources/tiles/floor.png", "./resources/tiles/floor.ron");
+        let portal_sprite_sheet = super::load_sprite_sheet(world, "./resources/tiles/portal.png", "./resources/tiles/portal.ron");
 
         for i in 0..50 {
             for j in 0..50 {
                 let mut transform = Transform::default();
-                transform.set_x((i * general::GRID_SCALE_X) as f32);
-                transform.set_y((j * general::GRID_SCALE_Y) as f32);
+                transform.set_x((j * general::GRID_SCALE_X) as f32);
+                transform.set_y((i * general::GRID_SCALE_Y) as f32);
                 transform.set_z(-10.0);
+                let mut sprite_sheet = floor_sprite_sheet.clone();
+                if i > 10 && i < 15 && ((j < 7) || (j > 42 && j <= 50)) {
+                    sprite_sheet = portal_sprite_sheet.clone();
+                }
                 let sprite = SpriteRender {
-                    sprite_sheet: sprite_sheet.clone(),
+                    sprite_sheet: sprite_sheet,
                     sprite_number: 0,
                 };
                 world.create_entity().with(transform).with(sprite).build();
