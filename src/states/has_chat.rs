@@ -8,7 +8,7 @@ use amethyst::{
 use crate::model::chat::payload::ResponsePayload;
 use crate::model::chat::payload::RequestPayload;
 
-pub trait ChatState {
+pub trait HasChat {
     fn get_chat_button(&self) -> Entity;
     fn set_chat_button(&mut self, e: Entity);
     fn get_chat_input(&self) -> Entity;

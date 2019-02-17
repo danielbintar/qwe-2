@@ -28,7 +28,7 @@ use super::create::State as CreateState;
 
 enum Buttons {
     Create,
-    Enter(usize),
+    Enter(Character),
     Logout
 }
 
@@ -101,7 +101,7 @@ impl State {
                     .with_anchor(Anchor::TopMiddle)
                     .with_position(x as f32, -400.);
                 let button = button_builder.build_from_world(world);
-                self.ui_buttons.insert(button, Buttons::Enter(self.characters[i as usize].get_id()));
+                self.ui_buttons.insert(button, Buttons::Enter(self.characters[i].clone()));
             }
         }
 
@@ -157,27 +157,48 @@ impl State {
         }))
     }
 
-    fn enter(&self, world: &mut World, id: usize) -> SimpleTrans {
-        request_enter(world, id);
+    fn enter(&self, world: &mut World, character: Character) -> SimpleTrans {
+        request_enter(world, character.get_id());
 
-        let (tx_receive, rx_receive) = mpsc::channel();
-        let (tx_send, rx_send) = mpsc::channel();
-        let sender = Arc::new(Mutex::new(tx_send));
-        let receiver = Arc::new(Mutex::new(rx_receive));
-        let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
-        let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
-        world.add_resource(r);
-
-        let uri = get_chat_link(world);
-        thread::spawn(move || {
-            connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
-        });
+        init_chat(world);
+        init_movement(world);
+        world.add_resource(character);
 
         world.delete_all();
         Trans::Switch(Box::new({
             CimahiState::new()
         }))
     }
+}
+
+fn init_chat(world: &mut World) {
+    let (tx_receive, rx_receive) = mpsc::channel();
+    let (tx_send, rx_send) = mpsc::channel();
+    let sender = Arc::new(Mutex::new(tx_send));
+    let receiver = Arc::new(Mutex::new(rx_receive));
+    let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+    let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+    world.add_resource(r);
+
+    let uri = get_chat_link(world);
+    thread::spawn(move || {
+        connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+    });
+}
+
+fn init_movement(world: &mut World) {
+    let (tx_receive, rx_receive) = mpsc::channel();
+    let (tx_send, rx_send) = mpsc::channel();
+    let sender = Arc::new(Mutex::new(tx_send));
+    let receiver = Arc::new(Mutex::new(rx_receive));
+    let r = crate::model::movement::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+    let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
+    world.add_resource(r);
+
+    let uri = get_movement_link(world);
+    thread::spawn(move || {
+        connect(uri, |out| crate::model::movement::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+    });
 }
 
 fn request_enter(world: &mut World, id: usize) {
@@ -199,6 +220,11 @@ fn request_enter(world: &mut World, id: usize) {
 fn get_chat_link(world: &mut World) -> String {
     let config = world.read_resource::<Request>();
     format!("{}{}", config.ws_url, "/chat")
+}
+
+fn get_movement_link(world: &mut World) -> String {
+    let config = world.read_resource::<Request>();
+    format!("{}{}", config.ws_url, "/move")
 }
 
 impl SimpleState for State {
@@ -224,7 +250,7 @@ impl SimpleState for State {
                         match button {
                             Buttons::Logout => return self.logout(data.world),
                             Buttons::Create => return self.create(data.world),
-                            Buttons::Enter(x) => return self.enter(data.world, x.clone())
+                            Buttons::Enter(y) => return self.enter(data.world, (*y).clone())
                         }
                     }
                 },
