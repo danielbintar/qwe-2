@@ -1,6 +1,6 @@
 use amethyst::{
     core::Transform,
-    ecs::{Join, Read, ReadStorage, System, WriteStorage},
+    ecs::{Join, Read, Write, ReadStorage, System, WriteStorage},
     input::InputHandler
 };
 
@@ -8,7 +8,8 @@ use crate::components::player::Player;
 use crate::model::movement::resource::Resource as MovementClient;
 use crate::model::character::{Character, CharacterPosition};
 use crate::model::movement::payload::RequestPayload as RequestPayload;
-
+use crate::model::game::Game;
+use crate::states::PlayerAction;
 
 use crate::general;
 
@@ -37,9 +38,10 @@ impl<'s> System<'s> for Movement {
         WriteStorage<'s, Transform>,
         Read<'s, InputHandler<String, String>>,
         Read<'s, AllowMoving>,
+        Write<'s, Game>
     );
 
-    fn run(&mut self, (players, character, movement_client, mut transforms, input, allow_moving): Self::SystemData) {
+    fn run(&mut self, (players, character, movement_client, mut transforms, input, allow_moving, mut game): Self::SystemData) {
         let received = movement_client.rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
@@ -48,8 +50,13 @@ impl<'s> System<'s> for Movement {
                     let position: CharacterPosition = serde_json::from_str(&decoded_position).unwrap();
                     for (player, transform) in (&players, &mut transforms).join() {
                         if player.get_id() == position.get_id() {
-                            transform.set_x((position.get_x() * general::GRID_SCALE_X) as f32);
-                            transform.set_y((position.get_y() * general::GRID_SCALE_Y) as f32);
+                            if ((position.get_x() < 7) || (position.get_x() > 42)) &&
+                                ((position.get_y() > 10) && (position.get_y()) < 15) {
+                                game.player_action = Some(PlayerAction::LeaveTown);
+                            } else {
+                                transform.set_x((position.get_x() * general::GRID_SCALE_X) as f32);
+                                transform.set_y((position.get_y() * general::GRID_SCALE_Y) as f32);
+                            }
                         }
                     }
                 }

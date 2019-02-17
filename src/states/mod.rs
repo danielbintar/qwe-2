@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod character;
 pub mod town;
+pub mod region;
 pub mod has_chat;
 pub mod has_characters;
 
@@ -34,4 +35,9 @@ fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> Sprit
         (),
         &sprite_sheet_store,
     )
+}
+
+#[derive(Clone)]
+pub enum PlayerAction {
+    LeaveTown
 }

@@ -19,8 +19,7 @@ impl Resource {
 
 impl Default for Resource {
     fn default() -> Self {
-        let (_, rx_receive) = mpsc::channel();
-        let (tx_send, _) = mpsc::channel();
+        let (tx_send, rx_receive) = mpsc::channel();
         let sender = Arc::new(Mutex::new(tx_send));
         let receiver = Arc::new(Mutex::new(rx_receive));
         Self {

@@ -19,6 +19,7 @@ mod systems;
 use crate::states::auth::login::State;
 use crate::systems::movement::Movement as MovementSystem;
 use crate::config::Request;
+use crate::model::game::Game;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -53,6 +54,7 @@ fn main() -> amethyst::Result<()> {
 
     let mut game = Application::build("./", State::new())?
         .with_resource(request_config)
+        .with_resource(Game::default())
         .build(game_data)?;
 
     game.run();

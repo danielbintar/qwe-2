@@ -5,8 +5,11 @@ use amethyst::{
 
 use super::super::has_chat::HasChat;
 use super::super::has_characters::HasCharacters;
+use super::super::PlayerAction::LeaveTown;
+use super::super::region::southeast_asia::State as SoutheastAsiaState;
 use super::IsTown;
 use crate::model::character::CharacterPosition;
+use crate::model::game::Game;
 
 pub struct State {
     chat_button: Option<Entity>,
@@ -75,8 +78,17 @@ impl SimpleState for State {
         self.init_town(world);
     }
 
-    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
-        self.handle_receive_chat(data.world);
+    fn fixed_update(&mut self, data: StateData<GameData>) -> SimpleTrans {
+        let world = data.world;
+        self.handle_receive_chat(world);
+
+        let game = world.read_resource::<Game>().clone();
+
+        if let Some(LeaveTown) = game.player_action {
+            world.delete_all();
+            return Trans::Switch(Box::new(SoutheastAsiaState));
+        }
+
         Trans::None
     }
 
