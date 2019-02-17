@@ -31,10 +31,9 @@ pub trait HasCharacters {
 
         for character in &characters {
             let player_sprite = load_sprite_sheet(world, "./resources/sprites/player.png", "./resources/sprites/player.ron");
+            let player = init_player(world, &player_sprite, character);
             if character.get_id() == current_character_id {
-                parent = Some(init_main_player(world, &player_sprite, character));
-            } else {
-                init_player(world, &player_sprite, character);
+                parent = Some(player);
             }
         }
         init_camera(world, parent.unwrap());
@@ -54,23 +53,6 @@ fn init_camera(world: &mut World, parent: Entity) {
         .build();
 }
 
-fn init_main_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &CharacterPosition) -> Entity {
-    let mut transform = Transform::default();
-    transform.set_x(character.get_x() as f32);
-    transform.set_y(character.get_y() as f32);
-    let sprite = SpriteRender {
-        sprite_sheet: sprite_sheet.clone(),
-        sprite_number: 0,
-    };
-    world
-        .create_entity()
-        .with(transform)
-        .with(sprite)
-        .with(Player)
-        .with(Transparent)
-        .build()
-}
-
 fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &CharacterPosition) -> Entity {
     let mut transform = Transform::default();
     transform.set_x(character.get_x() as f32);
@@ -83,6 +65,7 @@ fn init_player(world: &mut World, sprite_sheet: &SpriteSheetHandle, character: &
         .create_entity()
         .with(transform)
         .with(sprite)
+        .with(Player::new(character.get_id()))
         .with(Transparent)
         .build()
 }
@@ -108,20 +91,4 @@ fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> Sprit
         (),
         &sprite_sheet_store,
     )
-}
-
-fn init_reference_sprite(world: &mut World, sprite_sheet: &SpriteSheetHandle) -> Entity {
-    let mut transform = Transform::default();
-    transform.set_x(0.0);
-    transform.set_y(0.0);
-    let sprite = SpriteRender {
-        sprite_sheet: sprite_sheet.clone(),
-        sprite_number: 0,
-    };
-    world
-        .create_entity()
-        .with(transform)
-        .with(sprite)
-        .with(Transparent)
-        .build()
 }

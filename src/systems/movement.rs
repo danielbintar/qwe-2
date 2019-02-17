@@ -11,7 +11,17 @@ use crate::model::movement::payload::RequestPayload as RequestPayload;
 
 use std::default::Default;
 
-pub struct Movement;
+pub struct Movement {
+    counter: usize
+}
+
+impl Movement {
+    pub fn new() -> Self {
+        Self {
+            counter: 0
+        }
+    }
+}
 
 impl<'s> System<'s> for Movement {
     type SystemData = (
@@ -23,6 +33,29 @@ impl<'s> System<'s> for Movement {
     );
 
     fn run(&mut self, (players, character, movement_client, mut transforms, input): Self::SystemData) {
+        let received = movement_client.rx.lock().unwrap().try_recv();
+        match received {
+            Ok(msg) => {
+                let msgs: Vec<&str> = msg.split("\n").collect();
+                for decoded_position in &msgs {
+                    let position: CharacterPosition = serde_json::from_str(&decoded_position).unwrap();
+                    for (player, transform) in (&players, &mut transforms).join() {
+                        if player.get_id() == position.get_id() {
+                            transform.set_x(position.get_x() as f32 * 5.0);
+                            transform.set_y(position.get_y() as f32 * 5.0);
+                        }
+                    }
+                }
+            },
+            Err(_) => {}
+        }
+
+        self.counter += 1;
+        if self.counter < 10 {
+            return;
+        }
+        self.counter = 0;
+
         let x_move = input.axis_value("entity_x").unwrap();
         let y_move = input.axis_value("entity_y").unwrap();
 
@@ -36,18 +69,6 @@ impl<'s> System<'s> for Movement {
 
                 movement_client.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
             }
-        }
-
-        let received = movement_client.rx.lock().unwrap().try_recv();
-        match received {
-            Ok(msg) => {
-                let position: CharacterPosition = serde_json::from_str(&msg).unwrap();
-                for (_, transform) in (&players, &mut transforms).join() {
-                    transform.set_x(position.get_x() as f32 * 10.0);
-                    transform.set_y(position.get_y() as f32 * 10.0);
-                }
-            },
-            Err(_) => {}
         }
     }
 }
