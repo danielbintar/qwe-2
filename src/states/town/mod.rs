@@ -1,15 +1,19 @@
 pub mod cimahi;
 
-use amethyst::prelude::*;
+use amethyst::{
+    prelude::*,
+    core::Transform,
+    renderer::{SpriteRender}
+};
 
 use reqwest::header;
 
 use serde_derive::{Deserialize};
 
 use crate::config::Request;
+
+use crate::general;
 use crate::model::token::Token;
-
-
 use crate::model::character::CharacterPosition;
 
 #[derive(Deserialize)]
@@ -38,7 +42,26 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
         };
 
         self.init_chat_ui(world);
+        self.init_background(world);
         self.init_characters_ui(world);
+    }
+
+    fn init_background(&self, world: &mut World) {
+        let sprite_sheet = super::load_sprite_sheet(world, "./resources/tiles/floor.png", "./resources/tiles/floor.ron");
+
+        for i in 0..50 {
+            for j in 0..50 {
+                let mut transform = Transform::default();
+                transform.set_x((i * general::GRID_SCALE_X) as f32);
+                transform.set_y((j * general::GRID_SCALE_Y) as f32);
+                transform.set_z(-10.0);
+                let sprite = SpriteRender {
+                    sprite_sheet: sprite_sheet.clone(),
+                    sprite_number: 0,
+                };
+                world.create_entity().with(transform).with(sprite).build();
+            }
+        }
     }
 
     fn request_town(&self, world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
