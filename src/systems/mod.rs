@@ -1,13 +1,11 @@
 pub mod movement;
 
 use amethyst::{
-    core::Transform,
     assets::{AssetStorage, Loader, Handle},
-    ecs::{Join, Read, ReadStorage, System, WriteStorage, Write, ReadExpect},
-    input::InputHandler,
+    ecs::{Read, ReadExpect},
     renderer::{
         PngFormat, SpriteSheet, SpriteSheetFormat,
-        SpriteSheetHandle, Texture, TextureMetadata
+        Texture, TextureMetadata
     }
 };
 

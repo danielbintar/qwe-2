@@ -1,14 +1,9 @@
 use amethyst::{
-    prelude::*,
-    core::{Transform, EventReader},
-    assets::{AssetStorage, Loader, Handle},
-    ecs::{Join, Read, ReadStorage, System, WriteStorage, Write, Entities, ReadExpect, Resources},
-    shred::{RunNow, RunWithPool, SetupHandler, SystemData},
+    core::Transform,
+    assets::{AssetStorage, Loader},
+    ecs::{Join, Read, System, WriteStorage, Entities, ReadExpect},
     input::InputHandler,
-    renderer::{
-        PngFormat, SpriteSheet, SpriteSheetFormat,
-        SpriteSheetHandle, Texture, TextureMetadata, SpriteRender
-    }
+    renderer::{SpriteSheet, Texture, SpriteRender}
 };
 
 use crate::components::player::Player;
