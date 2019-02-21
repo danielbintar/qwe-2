@@ -53,6 +53,7 @@ impl<'s> System<'s> for Movement {
     fn run(&mut self, (mut players, character, movement_client, mut transforms,
         input, allow_moving, entities, loader, texture_storage,
         sprite_sheet_storage, mut sprite_render_storage): Self::SystemData) {
+        let handler = super::load_sprite_sheet(loader, texture_storage, sprite_sheet_storage);
         let received = movement_client.rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
@@ -69,7 +70,6 @@ impl<'s> System<'s> for Movement {
                     }
 
                     if !found {
-                        let handler = super::load_sprite_sheet(loader, texture_storage, sprite_sheet_storage);
                         let sprite = SpriteRender {
                             sprite_sheet: handler.clone(),
                             sprite_number: 0,
@@ -82,7 +82,6 @@ impl<'s> System<'s> for Movement {
                             .with(Player::new(position.get_id()), &mut players)
                             .with(sprite, &mut sprite_render_storage)
                             .build();
-                        break;
                     }
                 }
             },
