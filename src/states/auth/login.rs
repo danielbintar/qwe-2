@@ -239,7 +239,6 @@ impl SimpleState for State {
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
-
         if self.login {
             data.world.delete_all();
             return Trans::Switch(Box::new({

@@ -51,7 +51,6 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(UiBundle::<String, String>::new())?
         .with(MovementSystem::new(), "movement", &[]);
 
-
     let mut game = Application::build("./", State::new())?
         .with_resource(request_config)
         .build(game_data)?;
