@@ -13,7 +13,7 @@ use amethyst::{
     }
 };
 
-fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
+fn load_sprite_sheet(world: &World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
     let texture_handle = {
         let loader = world.read_resource::<Loader>();
         let texture_storage = world.read_resource::<AssetStorage<Texture>>();

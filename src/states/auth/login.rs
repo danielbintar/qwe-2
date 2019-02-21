@@ -1,6 +1,6 @@
 use amethyst::{
     prelude::*,
-    assets::{Loader},
+    assets::Loader,
     ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, UiButtonBuilder, UiEventType::Click},
     ecs::Entity
 };
@@ -239,6 +239,7 @@ impl SimpleState for State {
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+
         if self.login {
             data.world.delete_all();
             return Trans::Switch(Box::new({

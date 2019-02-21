@@ -9,8 +9,7 @@ use amethyst::{
 };
 
 use crate::general;
-use crate::model::character::Character;
-use crate::model::character::CharacterPosition;
+use crate::model::character::{Character, CharacterPosition};
 use crate::components::player::Player;
 
 pub trait HasCharacters {
