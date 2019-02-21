@@ -1,6 +1,6 @@
 use amethyst::{
     prelude::*,
-    assets::{Loader},
+    assets::Loader,
     ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, UiButtonBuilder, UiEventType::Click},
     ecs::Entity
 };

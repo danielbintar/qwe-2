@@ -48,8 +48,8 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(
             InputBundle::<String, String>::new().with_bindings_from_file("./config/input.ron")?,
         )?
-        .with(MovementSystem::new(), "movement", &[])
-        .with_bundle(UiBundle::<String, String>::new())?;
+        .with_bundle(UiBundle::<String, String>::new())?
+        .with(MovementSystem::new(), "movement", &[]);
 
     let mut game = Application::build("./", State::new())?
         .with_resource(request_config)
