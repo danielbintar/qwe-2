@@ -6,15 +6,18 @@ use amethyst::{
     renderer::{SpriteRender}
 };
 
+use crate::{
+    general,
+    config::Request,
+    model::{
+        token::Token,
+        character::CharacterPosition
+    }
+};
+
 use reqwest::header;
 
-use serde_derive::{Deserialize};
-
-use crate::config::Request;
-
-use crate::general;
-use crate::model::token::Token;
-use crate::model::character::CharacterPosition;
+use serde_derive::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Town {
@@ -25,7 +28,7 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
     fn get_town_id(&self) -> usize;
 
     fn init_town(&mut self, world: &mut World) {
-        world.add_resource(crate::systems::movement::AllowMoving{allowed: true});
+        world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: true});
         let resp = self.request_town(world);
         match resp {
             Ok(mut resp) => {

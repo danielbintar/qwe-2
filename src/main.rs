@@ -1,6 +1,15 @@
 extern crate amethyst;
 extern crate reqwest;
 
+use crate::{
+    states::auth::login::State,
+    config::Request,
+    systems::{
+        ws_incoming_action::WsIncomingAction as WsIncomingActionSystem,
+        outgoing_movement::OutgoingMovement as OutgoingMovementSystem
+    }
+};
+
 use amethyst::{
     prelude::*,
     ui::{DrawUi, UiBundle},
@@ -15,10 +24,6 @@ mod model;
 mod general;
 mod components;
 mod systems;
-
-use crate::states::auth::login::State;
-use crate::systems::movement::Movement as MovementSystem;
-use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -49,7 +54,8 @@ fn main() -> amethyst::Result<()> {
             InputBundle::<String, String>::new().with_bindings_from_file("./config/input.ron")?,
         )?
         .with_bundle(UiBundle::<String, String>::new())?
-        .with(MovementSystem::new(), "movement", &[]);
+        .with(WsIncomingActionSystem, "ws_incoming_action", &[])
+        .with(OutgoingMovementSystem, "movement", &[]);
 
     let mut game = Application::build("./", State::new())?
         .with_resource(request_config)

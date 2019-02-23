@@ -1,26 +1,31 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct RequestPayload {
-	message: String
+    message: String
 }
 
 impl RequestPayload {
-	pub fn new(message: String) -> Self {
-		Self {
-			message
-		}
-	}
+    pub fn new(message: String) -> Self {
+        Self {
+            message
+        }
+    }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
+struct ChatSender {
+    name: String
+}
+
+#[derive(Deserialize)]
 pub struct ResponsePayload {
-	sender: String,
-	message: String
+    sender: ChatSender,
+    message: String
 }
 
 impl ResponsePayload {
-	pub fn get_full_message(&self) -> String {
-		format!("{}: {}", self.sender, self.message)
-	}
+    pub fn get_full_message(&self) -> String {
+        format!("{}: {}", self.sender.name, self.message)
+    }
 }

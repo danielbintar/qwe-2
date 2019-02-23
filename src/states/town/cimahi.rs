@@ -3,15 +3,19 @@ use amethyst::{
     ecs::Entity,
 };
 
-use super::super::has_chat::HasChat;
-use super::super::has_characters::HasCharacters;
-use super::IsTown;
+use super::{
+    IsTown,
+    super::{
+        has_chat::HasChat,
+        has_characters::HasCharacters
+    }
+};
+
 use crate::model::character::CharacterPosition;
 
 pub struct State {
     chat_button: Option<Entity>,
     chat_input: Option<Entity>,
-    chat_show: Option<Entity>,
     characters_position: Vec<CharacterPosition>
 }
 
@@ -20,7 +24,6 @@ impl State {
         Self {
             chat_button: None,
             chat_input: None,
-            chat_show: None,
             characters_position: Vec::new()
         }
     }
@@ -41,14 +44,6 @@ impl HasChat for State {
 
     fn set_chat_input(&mut self, e: Entity) {
         self.chat_input = Some(e)
-    }
-
-    fn get_chat_show(&self) -> Entity {
-        self.chat_show.unwrap()
-    }
-
-    fn set_chat_show(&mut self, e: Entity) {
-        self.chat_show = Some(e)
     }
 }
 
@@ -73,11 +68,6 @@ impl SimpleState for State {
         let world = data.world;
 
         self.init_town(world);
-    }
-
-    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
-        self.handle_receive_chat(data.world);
-        Trans::None
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
