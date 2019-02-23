@@ -11,7 +11,6 @@ use crate::model::character::CharacterPosition;
 pub struct State {
     chat_button: Option<Entity>,
     chat_input: Option<Entity>,
-    chat_show: Option<Entity>,
     characters_position: Vec<CharacterPosition>
 }
 
@@ -20,7 +19,6 @@ impl State {
         Self {
             chat_button: None,
             chat_input: None,
-            chat_show: None,
             characters_position: Vec::new()
         }
     }

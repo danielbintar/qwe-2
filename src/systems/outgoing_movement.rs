@@ -1,18 +1,11 @@
 use amethyst::{
-    core::Transform,
-    assets::{AssetStorage, Loader},
-    ecs::{Join, Read, System, WriteStorage, Entities, ReadExpect},
-    input::InputHandler,
-    renderer::{SpriteSheet, Texture, SpriteRender}
+    ecs::{Read, System},
+    input::InputHandler
 };
 
-use crate::components::player::Player;
 use crate::model::ws::resource::Resource as WsClient;
-use crate::model::character::{Character, CharacterPosition};
 use crate::model::movement::payload::RequestPayload as MovementRequestPayload;
 use crate::model::ws::payload::RequestPayload as WsRequestPayload;
-
-use crate::general;
 
 pub struct OutgoingMovement;
 

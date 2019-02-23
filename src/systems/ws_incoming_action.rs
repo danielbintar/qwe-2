@@ -1,8 +1,7 @@
 use amethyst::{
     core::Transform,
     assets::{AssetStorage, Loader},
-    ecs::{Join, Read, System, WriteStorage, Entities, ReadExpect},
-    input::InputHandler,
+    ecs::{Join, Read, System, WriteStorage, ReadStorage, Entities, ReadExpect},
     renderer::{SpriteSheet, Texture, SpriteRender},
     ui::UiText
 };
@@ -10,8 +9,7 @@ use amethyst::{
 use crate::components::chat::Show as ShowChat;
 use crate::components::player::Player;
 use crate::model::ws::resource::Resource as WsClient;
-use crate::model::character::{Character, CharacterPosition};
-use crate::model::ws::payload::{RequestPayload, ResponsePayload};
+use crate::model::ws::payload::ResponsePayload;
 
 use crate::general;
 
@@ -20,7 +18,7 @@ pub struct WsIncomingAction;
 impl<'s> System<'s> for WsIncomingAction {
     type SystemData = (
         Read<'s, WsClient>,
-        WriteStorage<'s, ShowChat>,
+        ReadStorage<'s, ShowChat>,
         WriteStorage<'s, UiText>,
         WriteStorage<'s, Player>,
         WriteStorage<'s, Transform>,
@@ -31,7 +29,7 @@ impl<'s> System<'s> for WsIncomingAction {
         WriteStorage<'s, SpriteRender>
     );
 
-    fn run(&mut self, (ws_client, mut chat_shows, mut ui_texts,
+    fn run(&mut self, (ws_client, chat_shows, mut ui_texts,
         mut players, mut transforms,
         entities, loader, texture_storage, sprite_sheet_storage, mut sprite_render_storage): Self::SystemData) {
         let received = ws_client .rx.lock().unwrap().try_recv();
@@ -40,7 +38,7 @@ impl<'s> System<'s> for WsIncomingAction {
                 let ws_payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
                 match ws_payload {
                     ResponsePayload::Chat(payload) => {
-                        for (chat_show, ui_text) in (&chat_shows, &mut ui_texts).join() {
+                        for (_chat_show, ui_text) in (&chat_shows, &mut ui_texts).join() {
                             ui_text.text.push_str(&payload.get_full_message());
                             ui_text.text.push_str("\n");
                         }

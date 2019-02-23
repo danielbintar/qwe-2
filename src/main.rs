@@ -22,7 +22,7 @@ use crate::systems::outgoing_movement::OutgoingMovement as OutgoingMovementSyste
 use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
-    // amethyst::start_logger(Default::default());
+    amethyst::start_logger(Default::default());
 
     let config = DisplayConfig::load("./config/display.ron");
     let request_config = Request::load("./config/request.ron");

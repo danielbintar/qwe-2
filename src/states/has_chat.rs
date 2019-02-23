@@ -6,7 +6,7 @@ use amethyst::{
 };
 
 use crate::model::chat::payload::RequestPayload as ChatRequestPayload;
-use crate::model::ws::payload::{RequestPayload, ResponsePayload};
+use crate::model::ws::payload::RequestPayload;
 
 use crate::components::chat::Show as ShowChat;
 
@@ -37,7 +37,7 @@ pub trait HasChat {
                 20.);
         chat_show_text.line_mode = Wrap;
 
-        let chat_show = world
+        world
             .create_entity()
             .with(transform)
             .with(ShowChat)
