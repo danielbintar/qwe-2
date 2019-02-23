@@ -23,11 +23,17 @@ impl<'s> System<'s> for WsIncomingAction {
         WriteStorage<'s, ShowChat>,
         WriteStorage<'s, UiText>,
         WriteStorage<'s, Player>,
-        WriteStorage<'s, Transform>
+        WriteStorage<'s, Transform>,
+        Entities<'s>,
+        ReadExpect<'s, Loader>,
+        Read<'s, AssetStorage<Texture>>,
+        Read<'s, AssetStorage<SpriteSheet>>,
+        WriteStorage<'s, SpriteRender>
     );
 
     fn run(&mut self, (ws_client, mut chat_shows, mut ui_texts,
-        mut players, mut transforms): Self::SystemData) {
+        mut players, mut transforms,
+        entities, loader, texture_storage, sprite_sheet_storage, mut sprite_render_storage): Self::SystemData) {
         let received = ws_client .rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
@@ -40,12 +46,32 @@ impl<'s> System<'s> for WsIncomingAction {
                         }
                     },
                     ResponsePayload::Move(payload) => {
+                        let mut found = false;
                         for (player, transform) in (&players, &mut transforms).join() {
                             if player.get_id() == payload.get_id() {
+                                found = true;
                                 transform.set_x((payload.get_x() * general::GRID_SCALE_X) as f32);
                                 transform.set_y((payload.get_y() * general::GRID_SCALE_Y) as f32);
                                 break;
                             }
+                        }
+
+                        if !found {
+                            let handler = super::load_sprite_sheet(loader, texture_storage, sprite_sheet_storage);
+
+                            let sprite = SpriteRender {
+                                sprite_sheet: handler.clone(),
+                                sprite_number: 0,
+                            };
+
+                            let mut transform = Transform::default();
+                            transform.set_x((payload.get_x() * general::GRID_SCALE_X) as f32);
+                            transform.set_y((payload.get_y() * general::GRID_SCALE_Y) as f32);
+                            entities.build_entity()
+                                .with(transform, &mut transforms)
+                                .with(Player::new(payload.get_id()), &mut players)
+                                .with(sprite, &mut sprite_render_storage)
+                                .build();
                         }
                     }
                 }

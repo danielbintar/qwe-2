@@ -37,10 +37,8 @@ impl<'s> System<'s> for OutgoingMovement {
         let y_move = input.axis_value("entity_y").unwrap();
 
         if x_move != 0.0 || y_move != 0.0 {
-            println!("moving");
             let data = MovementRequestPayload::new(x_move, y_move);
             let payload = WsRequestPayload::Move(data);
-            println!("{}", serde_json::to_string(&payload).unwrap());
             ws_client.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
         }
     }
