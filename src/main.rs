@@ -17,7 +17,7 @@ mod components;
 mod systems;
 
 use crate::states::auth::login::State;
-use crate::systems::movement::Movement as MovementSystem;
+use crate::systems::ws_incoming_action::WsIncomingAction as WsIncomingActionSystem;
 use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
@@ -49,7 +49,7 @@ fn main() -> amethyst::Result<()> {
             InputBundle::<String, String>::new().with_bindings_from_file("./config/input.ron")?,
         )?
         .with_bundle(UiBundle::<String, String>::new())?
-        .with(MovementSystem::new(), "movement", &[]);
+        .with(WsIncomingActionSystem, "ws_incoming_action", &[]);
 
     let mut game = Application::build("./", State::new())?
         .with_resource(request_config)
