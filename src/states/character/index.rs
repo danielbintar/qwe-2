@@ -160,8 +160,7 @@ impl State {
     fn enter(&self, world: &mut World, character: Character) -> SimpleTrans {
         request_enter(world, character.get_id());
 
-        init_chat(world);
-        init_movement(world);
+        init_action_websocket(world);
         world.add_resource(character);
 
         world.delete_all();
@@ -171,33 +170,18 @@ impl State {
     }
 }
 
-fn init_chat(world: &mut World) {
+fn init_action_websocket(world: &mut World) {
     let (tx_receive, rx_receive) = mpsc::channel();
     let (tx_send, rx_send) = mpsc::channel();
     let sender = Arc::new(Mutex::new(tx_send));
     let receiver = Arc::new(Mutex::new(rx_receive));
-    let r = crate::model::chat::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
+    let r = crate::model::ws::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
     let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
     world.add_resource(r);
 
-    let uri = get_chat_link(world);
+    let uri = get_ws_uri(world);
     thread::spawn(move || {
-        connect(uri, |out| crate::model::chat::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
-    });
-}
-
-fn init_movement(world: &mut World) {
-    let (tx_receive, rx_receive) = mpsc::channel();
-    let (tx_send, rx_send) = mpsc::channel();
-    let sender = Arc::new(Mutex::new(tx_send));
-    let receiver = Arc::new(Mutex::new(rx_receive));
-    let r = crate::model::movement::resource::Resource::new(Arc::clone(&sender), Arc::clone(&receiver));
-    let token = format!("Bearer {}", world.read_resource::<Token>().get_token());
-    world.add_resource(r);
-
-    let uri = get_movement_link(world);
-    thread::spawn(move || {
-        connect(uri, |out| crate::model::movement::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
+        connect(uri, |out| crate::model::ws::client::Client::new(out, &tx_receive, &rx_send, token.clone()) ).unwrap()
     });
 }
 
@@ -217,14 +201,9 @@ fn request_enter(world: &mut World, id: usize) {
         .unwrap();
 }
 
-fn get_chat_link(world: &mut World) -> String {
+fn get_ws_uri(world: &mut World) -> String {
     let config = world.read_resource::<Request>();
-    format!("{}{}", config.ws_url, "/chat")
-}
-
-fn get_movement_link(world: &mut World) -> String {
-    let config = world.read_resource::<Request>();
-    format!("{}{}", config.ws_url, "/move")
+    format!("{}{}", config.ws_url, "/play")
 }
 
 impl SimpleState for State {

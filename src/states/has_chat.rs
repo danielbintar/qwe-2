@@ -5,8 +5,8 @@ use amethyst::{
     ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, LineMode::Wrap, UiButtonBuilder, UiEventType::Click}
 };
 
-use crate::model::chat::payload::ResponsePayload;
-use crate::model::chat::payload::RequestPayload;
+use crate::model::chat::payload::RequestPayload as ChatRequestPayload;
+use crate::model::ws::payload::{RequestPayload, ResponsePayload};
 
 pub trait HasChat {
     fn get_chat_button(&self) -> Entity;
@@ -82,11 +82,12 @@ pub trait HasChat {
             StateEvent::Ui(x) => match x.event_type {
                 Click => {
                     if x.target == self.get_chat_button() {
-                        let ui_text_storage = world.write_storage::<UiText>();
+                        let ui_text_storage = world.read_storage::<UiText>();
                         let message = ui_text_storage.get(self.get_chat_input()).unwrap().text.clone();
-                        let r = world.read_resource::<crate::model::chat::resource::Resource>();
-                        let payload = RequestPayload::new(message);
-                        r.tx.lock().unwrap().send(serde_json::to_string(&payload).unwrap()).unwrap();
+                        let r = world.read_resource::<crate::model::ws::resource::Resource>();
+                        let chat_payload = ChatRequestPayload::new(message);
+                        let ws_payload = RequestPayload::Chat(chat_payload);
+                        r.tx.lock().unwrap().send(serde_json::to_string(&ws_payload).unwrap()).unwrap();
                     }
                 },
                 _ => (),
@@ -96,15 +97,20 @@ pub trait HasChat {
     }
 
     fn handle_receive_chat(&self, world: &mut World) {
-        let r = world.read_resource::<crate::model::chat::resource::Resource>();
+        let r = world.read_resource::<crate::model::ws::resource::Resource>();
         let received = r.rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
-                let payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
-                let mut ui_text_storage = world.write_storage::<UiText>();
-                let t = ui_text_storage.get_mut(self.get_chat_show()).unwrap();
-                t.text.push_str(&payload.get_full_message());
-                t.text.push_str("\n");
+                let ws_payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
+                match ws_payload {
+                    ResponsePayload::Chat(payload) => {
+                        let mut ui_text_storage = world.write_storage::<UiText>();
+                        let t = ui_text_storage.get_mut(self.get_chat_show()).unwrap();
+                        t.text.push_str(&payload.get_full_message());
+                        t.text.push_str("\n");
+                    },
+                    _ => ()
+                }
             },
             Err(_) => {}
         }

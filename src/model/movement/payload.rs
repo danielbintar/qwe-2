@@ -1,8 +1,13 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RequestPayload {
-    pub id: usize,
+    pub x: isize,
+    pub y: isize
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ResponsePayload {
     pub x: isize,
     pub y: isize
 }
