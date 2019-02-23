@@ -1,4 +1,4 @@
-pub mod movement;
+pub mod outgoing_movement;
 pub mod ws_incoming_action;
 
 use amethyst::{

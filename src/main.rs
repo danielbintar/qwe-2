@@ -18,7 +18,7 @@ mod systems;
 
 use crate::states::auth::login::State;
 use crate::systems::ws_incoming_action::WsIncomingAction as WsIncomingActionSystem;
-use crate::systems::movement::Movement as MovementSystem;
+use crate::systems::outgoing_movement::OutgoingMovement as OutgoingMovementSystem;
 use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
@@ -51,7 +51,7 @@ fn main() -> amethyst::Result<()> {
         )?
         .with_bundle(UiBundle::<String, String>::new())?
         .with(WsIncomingActionSystem, "ws_incoming_action", &[])
-        .with(MovementSystem, "movement", &[]);
+        .with(OutgoingMovementSystem, "movement", &[]);
 
     let mut game = Application::build("./", State::new())?
         .with_resource(request_config)

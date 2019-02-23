@@ -25,7 +25,7 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
     fn get_town_id(&self) -> usize;
 
     fn init_town(&mut self, world: &mut World) {
-        world.add_resource(crate::systems::movement::AllowMoving{allowed: true});
+        world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: true});
         let resp = self.request_town(world);
         match resp {
             Ok(mut resp) => {

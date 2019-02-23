@@ -8,6 +8,7 @@ use amethyst::{
 };
 
 use crate::components::chat::Show as ShowChat;
+use crate::components::player::Player;
 use crate::model::ws::resource::Resource as WsClient;
 use crate::model::character::{Character, CharacterPosition};
 use crate::model::ws::payload::{RequestPayload, ResponsePayload};
@@ -21,9 +22,12 @@ impl<'s> System<'s> for WsIncomingAction {
         Read<'s, WsClient>,
         WriteStorage<'s, ShowChat>,
         WriteStorage<'s, UiText>,
+        WriteStorage<'s, Player>,
+        WriteStorage<'s, Transform>
     );
 
-    fn run(&mut self, (ws_client, mut chat_shows, mut ui_texts): Self::SystemData) {
+    fn run(&mut self, (ws_client, mut chat_shows, mut ui_texts,
+        mut players, mut transforms): Self::SystemData) {
         let received = ws_client .rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
@@ -35,7 +39,15 @@ impl<'s> System<'s> for WsIncomingAction {
                             ui_text.text.push_str("\n");
                         }
                     },
-                    _ => ()
+                    ResponsePayload::Move(payload) => {
+                        for (player, transform) in (&players, &mut transforms).join() {
+                            if player.get_id() == payload.get_id() {
+                                transform.set_x((payload.get_x() * general::GRID_SCALE_X) as f32);
+                                transform.set_y((payload.get_y() * general::GRID_SCALE_Y) as f32);
+                                break;
+                            }
+                        }
+                    }
                 }
             },
             Err(_) => {}
