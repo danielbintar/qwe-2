@@ -1,14 +1,21 @@
 use amethyst::{
     prelude::*,
-    assets::{Loader},
+    assets::Loader,
     ecs::Entity,
-    ui::{UiTransform, Anchor, UiText, TtfFormat, TextEditing, LineMode::Wrap, UiButtonBuilder, UiEventType::Click}
+    ui::{
+        UiTransform, Anchor, UiText,
+        TtfFormat, TextEditing, LineMode::Wrap,
+        UiButtonBuilder, UiEventType::Click
+    }
 };
 
-use crate::model::chat::payload::RequestPayload as ChatRequestPayload;
-use crate::model::ws::payload::RequestPayload;
-
-use crate::components::chat::Show as ShowChat;
+use crate::{
+    model::{
+        ws::payload::RequestPayload,
+        chat::payload::RequestPayload as ChatRequestPayload
+    },
+    components::chat::Show as ShowChat
+};
 
 pub trait HasChat {
     fn get_chat_button(&self) -> Entity;

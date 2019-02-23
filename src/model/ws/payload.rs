@@ -11,14 +11,14 @@ use super::super::{
     }
 };
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize)]
 #[serde(tag = "action", content = "data", rename_all = "lowercase")]
 pub enum RequestPayload {
     Chat(ChatRequestData),
     Move(MoveRequestData)
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize)]
 #[serde(tag = "action", content = "data", rename_all = "lowercase")]
 pub enum ResponsePayload {
     Chat(ChatResponseData),

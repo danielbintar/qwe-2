@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize)]
 pub struct RequestPayload {
     message: String
 }
@@ -13,13 +13,12 @@ impl RequestPayload {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize)]
 struct ChatSender {
-    id: usize,
     name: String
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct ResponsePayload {
     sender: ChatSender,
     message: String

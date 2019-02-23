@@ -1,6 +1,15 @@
 extern crate amethyst;
 extern crate reqwest;
 
+use crate::{
+    states::auth::login::State,
+    config::Request,
+    systems::{
+        ws_incoming_action::WsIncomingAction as WsIncomingActionSystem,
+        outgoing_movement::OutgoingMovement as OutgoingMovementSystem
+    }
+};
+
 use amethyst::{
     prelude::*,
     ui::{DrawUi, UiBundle},
@@ -15,11 +24,6 @@ mod model;
 mod general;
 mod components;
 mod systems;
-
-use crate::states::auth::login::State;
-use crate::systems::ws_incoming_action::WsIncomingAction as WsIncomingActionSystem;
-use crate::systems::outgoing_movement::OutgoingMovement as OutgoingMovementSystem;
-use crate::config::Request;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());

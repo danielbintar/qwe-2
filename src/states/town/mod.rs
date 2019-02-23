@@ -6,15 +6,18 @@ use amethyst::{
     renderer::{SpriteRender}
 };
 
+use crate::{
+    general,
+    config::Request,
+    model::{
+        token::Token,
+        character::CharacterPosition
+    }
+};
+
 use reqwest::header;
 
-use serde_derive::{Deserialize};
-
-use crate::config::Request;
-
-use crate::general;
-use crate::model::token::Token;
-use crate::model::character::CharacterPosition;
+use serde_derive::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Town {

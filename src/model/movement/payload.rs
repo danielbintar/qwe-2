@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize)]
 pub struct RequestPayload {
     direction: String
 }
@@ -24,12 +24,12 @@ impl RequestPayload {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize)]
 struct Character {
     id: usize
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize)]
 pub struct ResponsePayload {
     character: Character,
     x: usize,

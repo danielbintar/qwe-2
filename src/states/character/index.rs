@@ -5,26 +5,30 @@ use amethyst::{
     ecs::Entity
 };
 
-use crate::config::Request;
-use crate::model::token::Token;
-use crate::model::character::Character;
-use crate::general;
+use crate::{
+    config::Request,
+    model::{token::Token, character::Character},
+    general
+};
 
-use std::vec::Vec;
-use std::collections::HashMap;
-use std::thread;
-
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::mpsc;
+use std::{
+    vec::Vec,
+    collections::HashMap,
+    thread,
+    sync::{Arc, Mutex, mpsc}
+};
 
 use reqwest::header;
 
 use ws::connect;
 
-use super::super::auth::login::State as LoginState;
-use super::super::town::cimahi::State as CimahiState;
-use super::create::State as CreateState;
+use super::{
+    create::State as CreateState,
+    super::{
+        auth::login::State as LoginState,
+        town::cimahi::State as CimahiState
+    }
+};
 
 enum Buttons {
     Create,

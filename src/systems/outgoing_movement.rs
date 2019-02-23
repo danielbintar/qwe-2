@@ -3,9 +3,13 @@ use amethyst::{
     input::InputHandler
 };
 
-use crate::model::ws::resource::Resource as WsClient;
-use crate::model::movement::payload::RequestPayload as MovementRequestPayload;
-use crate::model::ws::payload::RequestPayload as WsRequestPayload;
+use crate::model::{
+    ws::{
+        resource::Resource as WsClient,
+        payload::RequestPayload as WsRequestPayload
+    },
+    movement::payload::RequestPayload as MovementRequestPayload
+};
 
 pub struct OutgoingMovement;
 

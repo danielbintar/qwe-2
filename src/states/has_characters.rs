@@ -8,9 +8,14 @@ use amethyst::{
     }
 };
 
-use crate::general;
-use crate::model::character::{Character, CharacterPosition};
-use crate::components::player::Player;
+use crate::{
+    general,
+    components::player::Player,
+    model::character::{
+        Character,
+        CharacterPosition
+    }
+};
 
 pub trait HasCharacters {
     fn set_characters_position(&mut self, c: Vec<CharacterPosition>);

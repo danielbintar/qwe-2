@@ -3,9 +3,14 @@ use amethyst::{
     ecs::Entity,
 };
 
-use super::super::has_chat::HasChat;
-use super::super::has_characters::HasCharacters;
-use super::IsTown;
+use super::{
+    IsTown,
+    super::{
+        has_chat::HasChat,
+        has_characters::HasCharacters
+    }
+};
+
 use crate::model::character::CharacterPosition;
 
 pub struct State {

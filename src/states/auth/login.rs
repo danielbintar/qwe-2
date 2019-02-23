@@ -7,10 +7,15 @@ use amethyst::{
 
 use std::collections::HashMap;
 
-use crate::config::Request;
-use crate::model::token::Token;
-use super::register::State as RegisterState;
-use super::super::character::index::State as CharacterState;
+use crate::{
+    config::Request,
+    model::token::Token
+};
+
+use super::{
+    super::character::index::State as CharacterState,
+    register::State as RegisterState
+};
 
 enum Buttons {
     Login,

@@ -1,6 +1,8 @@
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::mpsc::{self, Sender, Receiver};
+use std::sync::{
+    Arc,
+    Mutex,
+    mpsc::{self, Sender, Receiver}
+};
 
 pub struct Resource {
     pub tx: Arc<Mutex<Sender<String>>>,

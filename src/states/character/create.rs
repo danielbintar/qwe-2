@@ -5,9 +5,13 @@ use amethyst::{
     ecs::Entity
 };
 
-use crate::config::Request;
-use crate::model::token::Token;
-use crate::model::error::Response as ErrorResponse;
+use crate::{
+    config::Request,
+    model::{
+        token::Token,
+        error::Response as ErrorResponse
+    }
+};
 
 use super::index::State as IndexState;
 

@@ -6,12 +6,17 @@ use amethyst::{
     ui::UiText
 };
 
-use crate::components::chat::Show as ShowChat;
-use crate::components::player::Player;
-use crate::model::ws::resource::Resource as WsClient;
-use crate::model::ws::payload::ResponsePayload;
-
-use crate::general;
+use crate::{
+    general,
+    model::ws::{
+        payload::ResponsePayload,
+        resource::Resource as WsClient
+    },
+    components::{
+        chat::Show as ShowChat,
+        player::Player
+    }
+};
 
 pub struct WsIncomingAction;
 
