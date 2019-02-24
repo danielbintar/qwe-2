@@ -34,5 +34,6 @@ pub enum RequestPayload {
 pub enum ResponsePayload {
     Chat(ChatResponseData),
     Move(MoveResponseData),
-    Logout(LogoutResponseData)
+    Logout(LogoutResponseData),
+    Ping
 }
