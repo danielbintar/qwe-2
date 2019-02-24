@@ -42,6 +42,7 @@ impl<'s> System<'s> for WsIncomingAction {
             Ok(msg) => {
                 let ws_payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
                 match ws_payload {
+                    ResponsePayload::Ping => (),
                     ResponsePayload::Logout(payload) => {
                         for (player, entity) in (&players, &entities).join() {
                             if player.get_id() == payload.get_id() {
