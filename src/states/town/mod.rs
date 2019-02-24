@@ -50,6 +50,7 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
     }
 
     fn init_background(&self, world: &mut World) {
+        let portal_sprite_sheet = super::load_sprite_sheet(world, "./resources/tiles/portal.png", "./resources/tiles/portal.ron");
         let sprite_sheet = super::load_sprite_sheet(world, "./resources/tiles/floor.png", "./resources/tiles/floor.ron");
 
         for i in 0..50 {
@@ -58,6 +59,11 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
                 transform.set_x((i * general::GRID_SCALE_X) as f32);
                 transform.set_y((j * general::GRID_SCALE_Y) as f32);
                 transform.set_z(-10.0);
+
+                let mut sprite_sheet = sprite_sheet.clone();
+                if j > 10 && j < 15 && ((i < 7) || (i > 42 && i <= 50)) {
+                    sprite_sheet = portal_sprite_sheet.clone();
+                }
                 let sprite = SpriteRender {
                     sprite_sheet: sprite_sheet.clone(),
                     sprite_number: 0,
