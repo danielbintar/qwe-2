@@ -42,6 +42,14 @@ impl<'s> System<'s> for WsIncomingAction {
             Ok(msg) => {
                 let ws_payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
                 match ws_payload {
+                    ResponsePayload::Logout(payload) => {
+                        for (player, entity) in (&players, &entities).join() {
+                            if player.get_id() == payload.get_id() {
+                                entities.delete(entity).unwrap();
+                                break;
+                            }
+                        }
+                    },
                     ResponsePayload::Chat(payload) => {
                         for (_chat_show, ui_text) in (&chat_shows, &mut ui_texts).join() {
                             ui_text.text.push_str(&payload.get_full_message());
