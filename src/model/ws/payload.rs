@@ -11,6 +11,17 @@ use super::super::{
     }
 };
 
+#[derive(Deserialize)]
+pub struct LogoutResponseData {
+    id: usize
+}
+
+impl LogoutResponseData {
+    pub fn get_id(&self) -> usize {
+        self.id
+    }
+}
+
 #[derive(Serialize)]
 #[serde(tag = "action", content = "data", rename_all = "lowercase")]
 pub enum RequestPayload {
@@ -22,5 +33,6 @@ pub enum RequestPayload {
 #[serde(tag = "action", content = "data", rename_all = "lowercase")]
 pub enum ResponsePayload {
     Chat(ChatResponseData),
-    Move(MoveResponseData)
+    Move(MoveResponseData),
+    Logout(LogoutResponseData)
 }
