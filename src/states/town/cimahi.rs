@@ -11,7 +11,10 @@ use super::{
     }
 };
 
-use crate::model::character::CharacterPosition;
+use crate::model::{
+    character::CharacterPosition,
+    action::{Action, PlayerAction}
+};
 
 pub struct State {
     chat_button: Option<Entity>,
@@ -74,4 +77,21 @@ impl SimpleState for State {
         self.handle_send_chat(data.world, event);
         Trans::None
     }
+
+    fn fixed_update(&mut self, data: StateData<GameData>) -> SimpleTrans {
+        let world = data.world;
+        if is_leaving(world) {
+            world.delete_all();
+        }
+
+        Trans::None
+    }
+}
+
+fn is_leaving(world: &mut World) -> bool {
+    let mut action = world.write_resource::<Action>();
+    if let Some(PlayerAction::LeaveTown) = action.action.take() {
+        return true;
+    }
+    false
 }

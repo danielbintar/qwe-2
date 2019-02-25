@@ -9,7 +9,10 @@ use std::collections::HashMap;
 
 use crate::{
     config::Request,
-    model::token::Token
+    model::{
+        token::Token,
+        action::Action
+    }
 };
 
 use super::{
@@ -239,6 +242,7 @@ impl SimpleState for State {
         let world = data.world;
 
         world.register::<crate::components::player::Player>();
+        world.add_resource(Action::default());
 
         self.initialize_ui(world);
     }
