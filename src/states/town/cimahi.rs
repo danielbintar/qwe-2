@@ -7,7 +7,8 @@ use super::{
     IsTown,
     super::{
         has_chat::HasChat,
-        has_characters::HasCharacters
+        has_characters::HasCharacters,
+        region::southeast_asia::State as RegionState,
     }
 };
 
@@ -81,7 +82,11 @@ impl SimpleState for State {
     fn fixed_update(&mut self, data: StateData<GameData>) -> SimpleTrans {
         let world = data.world;
         if is_leaving(world) {
+            world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: false});
             world.delete_all();
+            return Trans::Switch(Box::new({
+                RegionState::new()
+            }))
         }
 
         Trans::None

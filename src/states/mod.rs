@@ -3,6 +3,7 @@ pub mod character;
 pub mod town;
 pub mod has_chat;
 pub mod has_characters;
+pub mod region;
 
 use amethyst::{
     prelude::*,
