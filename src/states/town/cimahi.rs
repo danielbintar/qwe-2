@@ -7,11 +7,15 @@ use super::{
     IsTown,
     super::{
         has_chat::HasChat,
-        has_characters::HasCharacters
+        has_characters::HasCharacters,
+        region::southeast_asia::State as RegionState,
     }
 };
 
-use crate::model::character::CharacterPosition;
+use crate::model::{
+    character::CharacterPosition,
+    action::{Action, PlayerAction}
+};
 
 pub struct State {
     chat_button: Option<Entity>,
@@ -74,4 +78,25 @@ impl SimpleState for State {
         self.handle_send_chat(data.world, event);
         Trans::None
     }
+
+    fn fixed_update(&mut self, data: StateData<GameData>) -> SimpleTrans {
+        let world = data.world;
+        if is_leaving(world) {
+            world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: false});
+            world.delete_all();
+            return Trans::Switch(Box::new({
+                RegionState::new()
+            }))
+        }
+
+        Trans::None
+    }
+}
+
+fn is_leaving(world: &mut World) -> bool {
+    let mut action = world.write_resource::<Action>();
+    if let Some(PlayerAction::LeaveTown) = action.action.take() {
+        return true;
+    }
+    false
 }

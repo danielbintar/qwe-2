@@ -22,6 +22,28 @@ impl LogoutResponseData {
     }
 }
 
+#[derive(Deserialize)]
+pub struct LeaveTownResponseData {
+    id: usize
+}
+
+impl LeaveTownResponseData {
+    pub fn get_id(&self) -> usize {
+        self.id
+    }
+}
+
+#[derive(Deserialize)]
+pub struct LeaveRegionResponseData {
+    id: usize
+}
+
+impl LeaveRegionResponseData {
+    pub fn get_id(&self) -> usize {
+        self.id
+    }
+}
+
 #[derive(Serialize)]
 #[serde(tag = "action", content = "data", rename_all = "lowercase")]
 pub enum RequestPayload {
@@ -30,10 +52,12 @@ pub enum RequestPayload {
 }
 
 #[derive(Deserialize)]
-#[serde(tag = "action", content = "data", rename_all = "lowercase")]
+#[serde(tag = "action", content = "data", rename_all = "snake_case")]
 pub enum ResponsePayload {
     Chat(ChatResponseData),
     Move(MoveResponseData),
     Logout(LogoutResponseData),
+    LeaveTown(LeaveTownResponseData),
+    LeaveRegion(LeaveRegionResponseData),
     Ping
 }

@@ -1,16 +1,20 @@
 use amethyst::{
     core::Transform,
     assets::{AssetStorage, Loader},
-    ecs::{Join, Read, System, WriteStorage, ReadStorage, Entities, ReadExpect},
+    ecs::{Join, Read, System, WriteStorage, ReadStorage, Entities, ReadExpect, Write},
     renderer::{SpriteSheet, Texture, SpriteRender},
     ui::UiText
 };
 
 use crate::{
     general,
-    model::ws::{
-        payload::ResponsePayload,
-        resource::Resource as WsClient
+    model::{
+        action::{Action, PlayerAction},
+        character::Character,
+        ws::{
+            payload::ResponsePayload,
+            resource::Resource as WsClient
+        }
     },
     components::{
         chat::Show as ShowChat,
@@ -31,18 +35,45 @@ impl<'s> System<'s> for WsIncomingAction {
         ReadExpect<'s, Loader>,
         Read<'s, AssetStorage<Texture>>,
         Read<'s, AssetStorage<SpriteSheet>>,
-        WriteStorage<'s, SpriteRender>
+        WriteStorage<'s, SpriteRender>,
+        Read<'s, Character>,
+        Write<'s, Action>
     );
 
     fn run(&mut self, (ws_client, chat_shows, mut ui_texts,
         mut players, mut transforms,
-        entities, loader, texture_storage, sprite_sheet_storage, mut sprite_render_storage): Self::SystemData) {
+        entities, loader, texture_storage, sprite_sheet_storage, mut sprite_render_storage,
+        character, mut action): Self::SystemData) {
         let received = ws_client .rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
                 let ws_payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
                 match ws_payload {
                     ResponsePayload::Ping => (),
+                    ResponsePayload::LeaveRegion(payload) => {
+                        if payload.get_id() == character.get_id() {
+                            action.action = Some(PlayerAction::LeaveRegion);
+                            return;
+                        }
+                        for (player, entity) in (&players, &entities).join() {
+                            if player.get_id() == payload.get_id() {
+                                entities.delete(entity).unwrap();
+                                break;
+                            }
+                        }
+                    },
+                    ResponsePayload::LeaveTown(payload) => {
+                        if payload.get_id() == character.get_id() {
+                            action.action = Some(PlayerAction::LeaveTown);
+                            return;
+                        }
+                        for (player, entity) in (&players, &entities).join() {
+                            if player.get_id() == payload.get_id() {
+                                entities.delete(entity).unwrap();
+                                break;
+                            }
+                        }
+                    },
                     ResponsePayload::Logout(payload) => {
                         for (player, entity) in (&players, &entities).join() {
                             if player.get_id() == payload.get_id() {

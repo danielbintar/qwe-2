@@ -4,3 +4,4 @@ pub mod error;
 pub mod chat;
 pub mod movement;
 pub mod ws;
+pub mod action;
