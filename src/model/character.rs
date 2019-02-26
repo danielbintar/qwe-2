@@ -3,7 +3,8 @@ use serde_derive::Deserialize;
 #[derive(Deserialize, Clone, Default)]
 pub struct Character {
     id: usize,
-    name: String
+    name: String,
+    pub active_place: Option<String>
 }
 
 impl Character {

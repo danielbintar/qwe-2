@@ -26,7 +26,8 @@ use super::{
     create::State as CreateState,
     super::{
         auth::login::State as LoginState,
-        town::cimahi::State as CimahiState
+        town::cimahi::State as CimahiState,
+        region::southeast_asia::State as SoutheastAsiaState
     }
 };
 
@@ -162,15 +163,27 @@ impl State {
     }
 
     fn enter(&self, world: &mut World, character: Character) -> SimpleTrans {
-        request_enter(world, character.get_id());
+        let character = request_enter(world, character.get_id());
 
         init_action_websocket(world);
+        let active_place = character.active_place.clone();
         world.add_resource(character);
 
         world.delete_all();
-        Trans::Switch(Box::new({
-            CimahiState::new()
-        }))
+
+        match active_place.unwrap().as_ref() {
+        "town" => {
+            Trans::Switch(Box::new({
+                CimahiState::new()
+            }))
+        },
+        "region" => {
+            Trans::Switch(Box::new({
+                SoutheastAsiaState::new()
+            }))
+        },
+        _ => panic!("unknown place")
+        }
     }
 }
 
@@ -189,7 +202,7 @@ fn init_action_websocket(world: &mut World) {
     });
 }
 
-fn request_enter(world: &mut World, id: usize) {
+fn request_enter(world: &mut World, id: usize) -> Character {
     let config = world.read_resource::<Request>();
     let uri = format!("{}{}{}/play", config.api_url, "/my-characters/", id);
 
@@ -202,7 +215,9 @@ fn request_enter(world: &mut World, id: usize) {
         .build().unwrap()
         .post(&uri)
         .send()
-        .unwrap();
+        .unwrap()
+        .json()
+        .unwrap()
 }
 
 fn get_ws_uri(world: &mut World) -> String {
