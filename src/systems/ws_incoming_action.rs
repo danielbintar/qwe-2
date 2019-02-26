@@ -50,6 +50,18 @@ impl<'s> System<'s> for WsIncomingAction {
                 let ws_payload: ResponsePayload = serde_json::from_str(&msg).unwrap();
                 match ws_payload {
                     ResponsePayload::Ping => (),
+                    ResponsePayload::LeaveRegion(payload) => {
+                        if payload.get_id() == character.get_id() {
+                            action.action = Some(PlayerAction::LeaveRegion);
+                            return;
+                        }
+                        for (player, entity) in (&players, &entities).join() {
+                            if player.get_id() == payload.get_id() {
+                                entities.delete(entity).unwrap();
+                                break;
+                            }
+                        }
+                    },
                     ResponsePayload::LeaveTown(payload) => {
                         if payload.get_id() == character.get_id() {
                             action.action = Some(PlayerAction::LeaveTown);

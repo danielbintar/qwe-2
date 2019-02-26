@@ -10,14 +10,16 @@ use crate::{
     config::Request,
     model::{
         token::Token,
-        character::CharacterPosition
+        character::CharacterPosition,
+        action::{Action, PlayerAction}
     }
 };
 
 use super::{
     super::{
         has_chat::HasChat,
-        has_characters::HasCharacters
+        has_characters::HasCharacters,
+        town::cimahi::State as CimahiState,
     }
 };
 
@@ -102,6 +104,19 @@ impl SimpleState for State {
         self.handle_send_chat(world, event);
         Trans::None
     }
+
+    fn fixed_update(&mut self, data: StateData<GameData>) -> SimpleTrans {
+        let world = data.world;
+        if is_leaving(world) {
+            world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: false});
+            world.delete_all();
+            return Trans::Switch(Box::new({
+                CimahiState::new()
+            }))
+        }
+
+        Trans::None
+    }
 }
 
 fn request_region(world: &mut World) -> std::result::Result<reqwest::Response, reqwest::Error> {
@@ -120,6 +135,7 @@ fn request_region(world: &mut World) -> std::result::Result<reqwest::Response, r
 }
 
 fn init_background(world: &mut World) {
+    let portal_sprite_sheet = super::super::load_sprite_sheet(world, "./resources/tiles/portal.png", "./resources/tiles/portal.ron");
     let sprite_sheet = super::super::load_sprite_sheet(world, "./resources/tiles/floor.png", "./resources/tiles/floor.ron");
 
     for i in 0..50 {
@@ -130,6 +146,10 @@ fn init_background(world: &mut World) {
             transform.set_z(-10.0);
 
             let mut sprite_sheet = sprite_sheet.clone();
+            if j >= 15 && j <= 18 && i >= 15 && i <= 18 {
+                sprite_sheet = portal_sprite_sheet.clone();
+            }
+
             let sprite = SpriteRender {
                 sprite_sheet: sprite_sheet.clone(),
                 sprite_number: 0,
@@ -137,4 +157,12 @@ fn init_background(world: &mut World) {
             world.create_entity().with(transform).with(sprite).build();
         }
     }
+}
+
+fn is_leaving(world: &mut World) -> bool {
+    let mut action = world.write_resource::<Action>();
+    if let Some(PlayerAction::LeaveRegion) = action.action.take() {
+        return true;
+    }
+    false
 }
