@@ -11,7 +11,8 @@ use crate::{
     config::Request,
     model::{
         token::Token,
-        character::CharacterPosition
+        character::CharacterPosition,
+        place::{Place, CurrentPlace}
     }
 };
 
@@ -47,6 +48,7 @@ trait IsTown : super::has_characters::HasCharacters + super::has_chat::HasChat {
         self.init_chat_ui(world);
         self.init_background(world);
         self.init_characters_ui(world);
+        world.add_resource(CurrentPlace{place: Some(Place::Town)});
     }
 
     fn init_background(&self, world: &mut World) {

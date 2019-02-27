@@ -10,6 +10,7 @@ use crate::{
     config::Request,
     model::{
         token::Token,
+        place::{Place, CurrentPlace},
         character::CharacterPosition,
         action::{Action, PlayerAction}
     }
@@ -97,6 +98,7 @@ impl SimpleState for State {
         };
         self.init_characters_ui(world);
         world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: true});
+        world.add_resource(CurrentPlace{place: Some(Place::Region)});
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {

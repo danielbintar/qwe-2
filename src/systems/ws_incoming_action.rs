@@ -10,6 +10,7 @@ use crate::{
     general,
     model::{
         action::{Action, PlayerAction},
+        place::CurrentPlace,
         character::Character,
         ws::{
             payload::ResponsePayload,
@@ -37,13 +38,14 @@ impl<'s> System<'s> for WsIncomingAction {
         Read<'s, AssetStorage<SpriteSheet>>,
         WriteStorage<'s, SpriteRender>,
         Read<'s, Character>,
-        Write<'s, Action>
+        Write<'s, Action>,
+        Read<'s, CurrentPlace>
     );
 
     fn run(&mut self, (ws_client, chat_shows, mut ui_texts,
         mut players, mut transforms,
         entities, loader, texture_storage, sprite_sheet_storage, mut sprite_render_storage,
-        character, mut action): Self::SystemData) {
+        character, mut action, current_place): Self::SystemData) {
         let received = ws_client .rx.lock().unwrap().try_recv();
         match received {
             Ok(msg) => {
@@ -89,6 +91,10 @@ impl<'s> System<'s> for WsIncomingAction {
                         }
                     },
                     ResponsePayload::Move(payload) => {
+                        let active_place = payload.get_active_place();
+                        if active_place != current_place.place.clone().unwrap() {
+                            return;
+                        }
                         let mut found = false;
                         for (player, transform) in (&players, &mut transforms).join() {
                             if player.get_id() == payload.get_id() {

@@ -11,7 +11,8 @@ use crate::{
     config::Request,
     model::{
         token::Token,
-        action::Action
+        action::Action,
+        place::CurrentPlace
     }
 };
 
@@ -243,6 +244,7 @@ impl SimpleState for State {
 
         world.register::<crate::components::player::Player>();
         world.add_resource(Action::default());
+        world.add_resource(CurrentPlace::default());
 
         self.initialize_ui(world);
     }

@@ -1,5 +1,7 @@
 use serde::{Serialize, Deserialize};
 
+use super::super::place::Place;
+
 #[derive(Serialize)]
 pub struct RequestPayload {
     direction: String
@@ -33,7 +35,8 @@ struct Character {
 pub struct ResponsePayload {
     character: Character,
     x: usize,
-    y: usize
+    y: usize,
+    active_place: Place
 }
 
 impl ResponsePayload {
@@ -47,5 +50,9 @@ impl ResponsePayload {
 
     pub fn get_y(&self) -> usize {
         self.y
+    }
+
+    pub fn get_active_place(&self) -> Place {
+        self.active_place.clone()
     }
 }
