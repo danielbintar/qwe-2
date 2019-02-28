@@ -243,6 +243,7 @@ impl SimpleState for State {
         let world = data.world;
 
         world.register::<crate::components::player::Player>();
+        world.register::<crate::model::monster::Monster>();
         world.add_resource(Action::default());
         world.add_resource(CurrentPlace::default());
 

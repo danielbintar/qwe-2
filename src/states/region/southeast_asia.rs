@@ -2,7 +2,7 @@ use amethyst::{
     prelude::*,
     ecs::Entity,
     core::Transform,
-    renderer::{SpriteRender}
+    renderer::{SpriteRender, Transparent, SpriteSheetHandle}
 };
 
 use crate::{
@@ -12,7 +12,8 @@ use crate::{
         token::Token,
         place::{Place, CurrentPlace},
         character::CharacterPosition,
-        action::{Action, PlayerAction}
+        action::{Action, PlayerAction},
+        monster::{Monster, MonsterPosition}
     }
 };
 
@@ -31,7 +32,8 @@ use serde_derive::Deserialize;
 pub struct State {
     chat_button: Option<Entity>,
     chat_input: Option<Entity>,
-    characters_position: Vec<CharacterPosition>
+    characters_position: Vec<CharacterPosition>,
+    monsters_position: Vec<MonsterPosition>
 }
 
 impl State {
@@ -39,9 +41,36 @@ impl State {
         Self {
             chat_button: None,
             chat_input: None,
-            characters_position: Vec::new()
+            characters_position: Vec::new(),
+            monsters_position: Vec::new()
         }
     }
+
+    fn init_monsters_ui(&self, world: &mut World) {
+        let monsters = self.monsters_position.clone();
+
+        for monster in &monsters {
+            let sprite = super::super::load_sprite_sheet(world, "./resources/sprites/monster.png", "./resources/sprites/monster.ron");
+            let _monster = init_monster(world, &sprite, monster);
+        }
+    }
+}
+
+fn init_monster(world: &mut World, sprite_sheet: &SpriteSheetHandle, monster: &MonsterPosition) -> Entity {
+    let mut transform = Transform::default();
+    transform.set_x((monster.get_x() * general::GRID_SCALE_X) as f32);
+    transform.set_y((monster.get_y() * general::GRID_SCALE_Y) as f32);
+    let sprite = SpriteRender {
+        sprite_sheet: sprite_sheet.clone(),
+        sprite_number: 0,
+    };
+    world
+        .create_entity()
+        .with(transform)
+        .with(sprite)
+        .with(Monster::new(monster.get_id()))
+        .with(Transparent)
+        .build()
 }
 
 impl HasChat for State {
@@ -74,7 +103,8 @@ impl HasCharacters for State {
 
 #[derive(Deserialize)]
 pub struct Region {
-    characters: Vec<CharacterPosition>
+    characters: Vec<CharacterPosition>,
+    monsters: Vec<MonsterPosition>
 }
 
 impl SimpleState for State {
@@ -88,6 +118,7 @@ impl SimpleState for State {
                 if resp.status().is_success() {
                     let region: Region = resp.json().unwrap();
                     self.set_characters_position(region.characters);
+                    self.monsters_position = region.monsters;
                 } else if resp.status().is_server_error() {
                     panic!()
                 } else {
@@ -97,6 +128,7 @@ impl SimpleState for State {
             Err(_) => panic!()
         };
         self.init_characters_ui(world);
+        self.init_monsters_ui(world);
         world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: true});
         world.add_resource(CurrentPlace{place: Some(Place::Region)});
     }
