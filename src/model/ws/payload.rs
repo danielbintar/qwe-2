@@ -44,6 +44,22 @@ impl LeaveRegionResponseData {
     }
 }
 
+#[derive(Deserialize)]
+pub struct InitBattleResponseData {
+    id: usize,
+    monster_id: usize
+}
+
+impl InitBattleResponseData {
+    pub fn get_id(&self) -> usize {
+        self.id
+    }
+
+    pub fn get_monster_id(&self) -> usize {
+        self.monster_id
+    }
+}
+
 #[derive(Serialize)]
 #[serde(tag = "action", content = "data", rename_all = "lowercase")]
 pub enum RequestPayload {
@@ -59,5 +75,6 @@ pub enum ResponsePayload {
     Logout(LogoutResponseData),
     LeaveTown(LeaveTownResponseData),
     LeaveRegion(LeaveRegionResponseData),
+    InitBattle(InitBattleResponseData),
     Ping
 }
