@@ -22,6 +22,7 @@ use super::{
         has_chat::HasChat,
         has_characters::HasCharacters,
         town::cimahi::State as CimahiState,
+        battle::State as BattleState
     }
 };
 
@@ -141,12 +142,25 @@ impl SimpleState for State {
 
     fn fixed_update(&mut self, data: StateData<GameData>) -> SimpleTrans {
         let world = data.world;
-        if is_leaving(world) {
-            world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: false});
-            world.delete_all();
-            return Trans::Switch(Box::new({
-                CimahiState::new()
-            }))
+
+        match player_action(world) {
+            None => (),
+            Some(PlayerAction::LeaveTown) => (),
+            Some(PlayerAction::LeaveRegion) => {
+                world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: false});
+                world.delete_all();
+                return Trans::Switch(Box::new({
+                    CimahiState::new()
+                }))
+            },
+            Some(PlayerAction::Battle) => {
+                world.add_resource(crate::systems::outgoing_movement::AllowMoving{allowed: false});
+                world.delete_all();
+                return Trans::Switch(Box::new({
+                    BattleState::new()
+                }))
+            }
+
         }
 
         Trans::None
@@ -193,10 +207,7 @@ fn init_background(world: &mut World) {
     }
 }
 
-fn is_leaving(world: &mut World) -> bool {
+fn player_action(world: &mut World) -> Option<PlayerAction> {
     let mut action = world.write_resource::<Action>();
-    if let Some(PlayerAction::LeaveRegion) = action.action.take() {
-        return true;
-    }
-    false
+    action.action.take()
 }

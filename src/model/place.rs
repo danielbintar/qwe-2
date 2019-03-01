@@ -4,7 +4,8 @@ use serde_derive::Deserialize;
 #[serde(rename_all = "snake_case")]
 pub enum Place {
     Region,
-    Town
+    Town,
+    Battle
 }
 
 pub struct CurrentPlace {

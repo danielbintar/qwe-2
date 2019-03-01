@@ -4,11 +4,14 @@ pub mod town;
 pub mod has_chat;
 pub mod has_characters;
 pub mod region;
+pub mod battle;
 
 use amethyst::{
     prelude::*,
+    core::Transform,
     assets::{AssetStorage, Loader},
     renderer::{
+        Camera, Projection,
         PngFormat, SpriteSheet, SpriteSheetFormat,
         SpriteSheetHandle, Texture, TextureMetadata
     }
@@ -35,4 +38,16 @@ fn load_sprite_sheet(world: &World, png_path: &str, ron_path: &str) -> SpriteShe
         (),
         &sprite_sheet_store,
     )
+}
+
+fn init_default_camera(world: &mut World) {
+    let mut transform = Transform::default();
+    transform.set_z(1.0);
+    world
+        .create_entity()
+        .with(Camera::from(Projection::orthographic(
+            -250.0, 250.0, -250.0, 250.0,
+        )))
+        .with(transform)
+        .build();
 }
