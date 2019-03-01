@@ -1,6 +1,7 @@
 pub enum PlayerAction {
     LeaveTown,
-    LeaveRegion
+    LeaveRegion,
+    Battle,
 }
 
 pub struct Action {
